@@ -12,12 +12,22 @@ const imgStream = document.getElementsByClassName('js-stream')[0]
 
 canvas.width = width;
 canvas.height = height;
+activeAreas = [false, false, false, false];
+noImage = false;
 
-var exampleSocket = new WebSocket("ws://localhost:8080", "protocolOne");
+var exampleSocket = new WebSocket(`ws://${window.location.hostname}:8080`, "protocolOne");
 exampleSocket.onmessage = function (e) {
     const data = JSON.parse(e.data)
-    if (data.event == 'camData') {
-        streamImage.src = 'data:image/png;base64,' + data.data.substr(2, data.data.length - 3);
+    if (data.event == 'camUpdate') {
+        if (data.data.camData) {
+            noImage = false;
+            streamImage.src = 'data:image/png;base64,' + data.data.camData.substr(2, data.data.camData.length - 3);
+        } else {
+            noImage = true;
+        }
+        for (let i = 0; i < activeAreas.length; i++) {
+            activeAreas[i] = data.data.movement.indexOf(i) === -1 ? false : true;
+        }
     } else if (data.event == 'shapeData') {
         areas = data.data;
     }
@@ -29,7 +39,7 @@ let areas = [];
 let currentArea = -1;
 
 drawPoints = () => {
-    for (let area of areas) {
+    for (const [i, area] of areas.entries()) {
         const points = area.points;
         if (points.length !== 0) {
             context.beginPath();
@@ -42,7 +52,7 @@ drawPoints = () => {
             context.lineTo(points[0][0], points[0][1]);
             context.strokeStyle = `rgba(${area.rgb.join(', ')}, 1)`;
             context.stroke();
-            context.fillStyle = `rgba(${area.rgb.join(', ')}, .3)`;
+            context.fillStyle = `rgba(${area.rgb.join(', ')}, ${activeAreas[i] ? .5 : .1})`;
             context.fill();
             context.closePath();
         }
@@ -76,7 +86,11 @@ for (let button of saveButtons) {
 }
 
 draw = () => {
-    context.drawImage(streamImage, 0, 0);
+    context.fillStyle = 'rgb(0, 0, 0)';
+    context.fillRect(0, 0, width, height);
+    if (!noImage) {
+        context.drawImage(streamImage, 0, 0);
+    }
     drawPoints();
     window.requestAnimationFrame(draw);
 }

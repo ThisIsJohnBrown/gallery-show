@@ -4,6 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const sassMiddleware = require('node-sass-middleware');
+const fs = require('fs');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -13,6 +14,8 @@ const app = express();
 const WebSocket = require('ws');
 
 const { spawn } = require('child_process');
+
+let shapeData = JSON.parse(fs.readFileSync('shape_config.json'))
 
 const wss = new WebSocket.Server({
   port: 8080,
@@ -37,19 +40,18 @@ const wss = new WebSocket.Server({
   }
 });
 
-let shapeData = [];
-
 wss.on('connection', function connection(ws) {
   console.log('user found!')
-  console.log(shapeData);
   ws.send(JSON.stringify({
     event: "shapeData",
     data: shapeData
   }))
+
   ws.on('message', function incoming(rawData) {
     const data = JSON.parse(rawData);
-    if (data.event === 'shapeData') {
+    if (data.event === 'updateAreas') {
       shapeData = data.data;
+      fs.writeFileSync('shape_config.json', JSON.stringify(shapeData))
     }
     wss.clients.forEach(function each(client) {
       if (client !== ws && client.readyState === WebSocket.OPEN) {

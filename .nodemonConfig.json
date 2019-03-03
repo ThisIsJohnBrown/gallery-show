@@ -1,0 +1,8 @@
+{
+    "verbose": false,
+    "ignore": [
+        "shape_config.json",
+        "public"
+    ],
+    "execMap": {}
+}
