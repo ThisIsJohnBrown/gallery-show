@@ -5,17 +5,20 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const sassMiddleware = require('node-sass-middleware');
 const fs = require('fs');
+const util = require("util");
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 
 const app = express();
+var multer = require('multer')
 
 const WebSocket = require('ws');
 
 const { spawn } = require('child_process');
 
 let shapeData = JSON.parse(fs.readFileSync('shape_config.json'))
+let currentMovement = [];
 
 const wss = new WebSocket.Server({
   port: 8080,
@@ -49,36 +52,53 @@ wss.on('connection', function connection(ws) {
 
   ws.on('message', function incoming(rawData) {
     const data = JSON.parse(rawData);
+    let updatedMovement = [{}, {}, {}, {}];
     if (data.event === 'updateAreas') {
       shapeData = data.data;
       fs.writeFileSync('shape_config.json', JSON.stringify(shapeData))
+    } else if (data.event === 'connectInfo') {
+      const keys = Object.keys(data.data)
+      keys.forEach((key) => {
+        this[key] = data.data[key];
+      })
+    } else if (data.event === 'camUpdate') {
+      for (let i = 0; i < shapeData.length; i++) {
+        const inNew = data.data.movement.indexOf(i) !== -1;
+        const inOld = currentMovement.indexOf(i) !== -1;
+        if (inNew && !inOld) {
+          updatedMovement[i] = {
+            videoId: i,
+            event: 'videoPlay'
+          };
+        } else if (inOld && !inNew) {
+          updatedMovement[i] = {
+            videoId: i,
+            event: 'videoPause'
+          };
+        }
+      }
+      currentMovement = data.data.movement
     }
     wss.clients.forEach(function each(client) {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(rawData);
+        if (data.event === 'camUpdate' && client.camera === false) {
+          let moveData = updatedMovement[client.videoId];
+          if (moveData.event) {
+            client.send(JSON.stringify({
+              event: moveData.event,
+              data: {
+                videoId: moveData.videoId
+              }
+            }))
+          }
+        } else {
+          client.send(rawData);
+        }
       }
     });
   });
 });
 
-const child = spawn('python', ['background.py']);
-
-process.stdin.pipe(child.stdin)
-
-child.stdout.on('data', (data) => {
-  console.log(`child stdout:\n${data}`);
-});
-
-// setInterval(() => {
-//   console.log('broadcasting!');
-//   wss.clients.forEach(function each(client) {
-//     if (client.readyState === WebSocket.OPEN) {
-//       client.send((Math.random() * 3).toFixed(3));
-//     }
-//   });
-// }, 3000)
-
-// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
@@ -93,6 +113,31 @@ app.use(sassMiddleware({
   sourceMap: true
 }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/videos/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, 'video-' + req.body.id + '.mp4')
+  }
+})
+
+var upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    if (file.mimetype !== 'video/mp4') {
+      req.fileValidationError = 'goes wrong on the mimetype';
+      return cb(null, false, new Error('goes wrong on the mimetype'));
+    }
+    cb(null, true);
+
+  }
+})
+
+app.post('/uploadFile', upload.single('video'), function (req, res, next) {
+  res.redirect(req.headers.referer);
+})
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

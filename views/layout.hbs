@@ -6,10 +6,13 @@
   <link rel='stylesheet' href='/stylesheets/style.css' />
 </head>
 
-<body>
+<body class="{{name}}">
   {{{body}}}
 </body>
 
-<script type="text/javascript" src="/javascripts/index.js"></script>
+<script type="text/javascript" src="/javascripts/vendor/TweenLite.min.js"></script>
+{{#each scripts}}
+<script type="text/javascript" src="/javascripts/{{this}}"></script>
+{{/each}}
 
 </html>

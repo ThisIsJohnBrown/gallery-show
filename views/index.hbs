@@ -12,3 +12,46 @@
 <input type="button" value="Draw Area 4" data-id="3" class="js-draw-button" />
 <input type="button" value="Save Area 4" data-id="3" class="js-save-button" />
 <img class="js-stream" />
+
+<div class="video-container">
+    <div class="video-wrapper js-video-wrapper" data-id="0">
+        <h1>Video #1</h1>
+        <video class="video-upload js-video" controls pause>
+        </video>
+        <form class="js-upload-form" action="/uploadFile" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="0" />
+            <input type="file" name="video" id="file-0" class="inputfile js-file" />
+            <label for="file-0">Choose a file</label>
+        </form>
+    </div>
+    <div class="video-wrapper js-video-wrapper" data-id="1">
+        <h1>Video #2</h1>
+        <video class="video-upload js-video" controls pause>
+        </video>
+        <form class="js-upload-form" action="/uploadFile" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="1" />
+            <input type="file" name="video" id="file-1" class="inputfile js-file" />
+            <label for="file-1">Choose a file</label>
+        </form>
+    </div>
+    <div class="video-wrapper js-video-wrapper" data-id="2">
+        <h1>Video #3</h1>
+        <video class="video-upload js-video" controls pause>
+        </video>
+        <form class="js-upload-form" action="/uploadFile" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="2" />
+            <input type="file" name="video" id="file-2" class="inputfile js-file" />
+            <label for="file-2">Choose a file</label>
+        </form>
+    </div>
+    <div class="video-wrapper js-video-wrapper" data-id="3">
+        <h1>Video #4</h1>
+        <video class="video-upload js-video" controls pause>
+        </video>
+        <form class="js-upload-form" action="/uploadFile" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="3" />
+            <input type="file" name="video" id="file-3" class="inputfile js-file" />
+            <label for="file-3">Choose a file</label>
+        </form>
+    </div>
+</div>

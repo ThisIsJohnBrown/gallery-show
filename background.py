@@ -1,21 +1,25 @@
+import sys
 import base64
 import json
 import numpy as np
 import cv2
 import time
 import websocket
+from shapely.geometry import Polygon
+from argparse import ArgumentParser
+
 try:
     import thread
 except ImportError:
     import _thread as thread
-from shapely.geometry import Polygon
+import threading
 
-from argparse import ArgumentParser
 
 parser = ArgumentParser()
 parser.add_argument("-n", "--no-image", dest="no_image")
 parser.add_argument("-t", "--show-threshold", dest="show_threshold")
 parser.add_argument("-o", "--show-outlines", dest="show_outlines")
+parser.add_argument("--hostname", dest="hostname")
 args = parser.parse_args()
 
 width = 640
@@ -31,7 +35,10 @@ fgbg = cv2.createBackgroundSubtractorMOG2(1000)
 
 detector = cv2.SimpleBlobDetector_create()
 
-shapes = [{}, {}, {}, {}]  # json.loads(open('shape_config.json', 'r').read())
+shapes = json.loads(open('shape_config.json', 'r').read())
+
+socket = None
+socket_open = False
 
 
 def update_shapes(data):
@@ -53,22 +60,31 @@ def on_error(ws, error):
 
 def on_close(ws):
     print("### closed ###")
+    socket_open = False
+    while(socket_open is False):
+        print("reconnecting")
+        time.sleep(5)
+        socket = init_socket()
 
 
 def on_open(ws):
-    pass
-    # websocket.send(json.dumps({
-    #     "event": "shapeData",
-    #     "data": shapes
-    # }))
+    socket_open = True
+    print('+++ open +++')
 
 
-websocket = websocket.WebSocketApp("ws://192.168.7.198:8080",
-                                   on_message=on_message,
-                                   on_error=on_error,
-                                   on_close=on_close,
-                                   on_open=on_open)
-thread.start_new_thread(websocket.run_forever, ())
+def init_socket():
+    socket = websocket.WebSocketApp("ws://" + ('localhost' if args.hostname is None else args.hostname) + ":8080",
+                                    on_message=on_message,
+                                    on_error=on_error,
+                                    on_close=on_close,
+                                    on_open=on_open)
+    socket.run_forever()
+    return socket
+
+
+while(socket_open is False):
+    socket = init_socket()
+    time.sleep(5)
 
 while(1):
     ret, frame = cap.read()
@@ -123,13 +139,14 @@ while(1):
 
     encoded, buffer = cv2.imencode('.jpg', cam_return)
     jpg_as_text = base64.b64encode(buffer)
-    websocket.send(json.dumps({
-        "event": "camUpdate",
-        "data": {
-            "camData": '' if args.no_image else str(jpg_as_text),
-            "movement": coordinates
-        }
-    }))
+    if socket_open:
+        socket.send(json.dumps({
+            "event": "camUpdate",
+            "data": {
+                "camData": '' if args.no_image else str(jpg_as_text),
+                "movement": coordinates
+            }
+        }))
 
     # if len(coordinates):
     #     print(coordinates)

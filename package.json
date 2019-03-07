@@ -1,18 +1,21 @@
 {
-  "name": "newserver",
+  "name": "inner-voices",
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "start": "fuser -k 8080/tcp; nodemon ./bin/www --config .nodemonConfig.json"
   },
   "dependencies": {
+    "body-parser": "1.18.3",
     "canvas": "2.3.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "express": "~4.16.0",
+    "express-handlebars": "3.0.2",
     "hbs": "~4.0.1",
     "http-errors": "~1.6.2",
     "morgan": "~1.9.0",
+    "multer": "1.4.1",
     "node-sass-middleware": "0.11.0",
     "nodemon": "1.18.10",
     "pixelmatch": "4.0.2",

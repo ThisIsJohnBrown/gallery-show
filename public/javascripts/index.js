@@ -15,8 +15,8 @@ canvas.height = height;
 activeAreas = [false, false, false, false];
 noImage = false;
 
-var exampleSocket = new WebSocket(`ws://${window.location.hostname}:8080`, "protocolOne");
-exampleSocket.onmessage = function (e) {
+var socket = new WebSocket(`ws://${window.location.hostname}:8080`, "protocolOne");
+socket.onmessage = function (e) {
     const data = JSON.parse(e.data)
     if (data.event == 'camUpdate') {
         if (data.data.camData) {
@@ -31,8 +31,6 @@ exampleSocket.onmessage = function (e) {
     } else if (data.event == 'shapeData') {
         areas = data.data;
     }
-    // context.drawImage('data:image/png;base64,' + data.camData.substr(2, data.camData.length - 3), 0, 0);
-    // imgStream.setAttribute('src', 'data:image/png;base64,' + data.camData.substr(2, data.camData.length - 3));
 }
 
 let areas = [];
@@ -78,7 +76,7 @@ let saveButtons = document.getElementsByClassName('js-save-button');
 for (let button of saveButtons) {
     button.addEventListener('mousedown', (e) => {
         currentArea = -1;
-        exampleSocket.send(JSON.stringify({
+        socket.send(JSON.stringify({
             "event": "updateAreas",
             "data": areas
         }));
@@ -96,3 +94,104 @@ draw = () => {
 }
 
 draw();
+
+var fileUploads = document.getElementsByClassName('js-file');
+for (let i = 0; i < fileUploads.length; i++) {
+    upload = fileUploads[i];
+    upload.addEventListener('change', fileChange, false);
+}
+
+function fileChange(e) {
+    const id = getClosest(e.target, '.js-video-wrapper').dataset.id;
+    const file = e.target.files[0];
+    handleFiles(file, id);
+}
+
+var videos = document.getElementsByClassName('js-video');
+for (let i = 0; i < videos.length; i++) {
+    video = videos[i];
+    var source = document.createElement('source');
+    source.setAttribute('src', `/videos/video-${i}.mp4?${(new Date()).getTime()}`);
+    video.appendChild(source);
+}
+
+let wrappers = document.getElementsByClassName('js-video-wrapper');
+
+for (let i = 0; i < wrappers.length; i++) {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        wrappers[i].addEventListener(eventName, preventDefaults, false)
+    });
+    ['dragenter'].forEach(eventName => {
+        wrappers[i].addEventListener(eventName, highlight, false)
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        wrappers[i].addEventListener(eventName, unhighlight, false)
+    });
+    wrappers[i].addEventListener('drop', handleDrop, false)
+}
+
+function handleDrop(e) {
+    const dt = e.dataTransfer
+    const files = dt.files
+    const id = getClosest(e.target, '.js-video-wrapper').dataset.id;
+    handleFiles(files[0], id)
+}
+
+function handleFiles(file, id) {
+    var formData = new FormData();
+    var xhr = new XMLHttpRequest();
+
+    formData.append("id", id)
+    formData.append("video", file, file.name);
+    xhr.open("POST", `http://${window.location.host}/uploadFile`, true);
+    xhr.onloadend = function () {
+        console.log('complete!');
+        window.location = window.location;
+    }
+
+    xhr.send(formData);
+}
+
+let counter = 0;
+function highlight(e) {
+    counter++;
+    getClosest(e.target, '.js-video-wrapper').classList.add('highlight')
+}
+
+function unhighlight(e) {
+    counter--;
+    if (counter === 0) {
+        getClosest(e.target, '.js-video-wrapper').classList.remove('highlight')
+    }
+}
+
+function preventDefaults(e) {
+    e.preventDefault()
+    e.stopPropagation()
+}
+
+var getClosest = function (elem, selector) {
+
+    // Element.matches() polyfill
+    if (!Element.prototype.matches) {
+        Element.prototype.matches =
+            Element.prototype.matchesSelector ||
+            Element.prototype.mozMatchesSelector ||
+            Element.prototype.msMatchesSelector ||
+            Element.prototype.oMatchesSelector ||
+            Element.prototype.webkitMatchesSelector ||
+            function (s) {
+                var matches = (this.document || this.ownerDocument).querySelectorAll(s),
+                    i = matches.length;
+                while (--i >= 0 && matches.item(i) !== this) { }
+                return i > -1;
+            };
+    }
+
+    // Get the closest matching element
+    for (; elem && elem !== document; elem = elem.parentNode) {
+        if (elem.matches(selector)) return elem;
+    }
+    return null;
+
+};
