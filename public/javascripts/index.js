@@ -17,6 +17,7 @@ noImage = false;
 
 var socket = new WebSocket(`ws://${window.location.hostname}:8080`, "protocolOne");
 socket.onmessage = function (e) {
+    console.log('a');
     const data = JSON.parse(e.data)
     if (data.event == 'camUpdate') {
         if (data.data.camData) {
@@ -29,6 +30,9 @@ socket.onmessage = function (e) {
             activeAreas[i] = data.data.movement.indexOf(i) === -1 ? false : true;
         }
     } else if (data.event == 'shapeData') {
+        if (areas.length === 0) {
+            initButtons(data.data);
+        }
         areas = data.data;
     }
 }
@@ -64,22 +68,23 @@ canvas.addEventListener("mousedown", (e) => {
     }
 });
 
-let drawButtons = document.getElementsByClassName('js-draw-button');
-for (let button of drawButtons) {
-    button.addEventListener('mousedown', (e) => {
-        currentArea = parseInt(e.target.dataset.id, 10);
-        areas[currentArea].points = [];
-    })
-}
-
-let saveButtons = document.getElementsByClassName('js-save-button');
-for (let button of saveButtons) {
-    button.addEventListener('mousedown', (e) => {
-        currentArea = -1;
-        socket.send(JSON.stringify({
-            "event": "updateAreas",
-            "data": areas
-        }));
+initButtons = (areas) => {
+    let drawButtons = document.getElementsByClassName('js-draw-button');
+    let saveButtons = document.getElementsByClassName('js-save-button');
+    areas.forEach((area, i) => {
+        drawButtons[i].style.backgroundColor = `rgba(${area.rgb[0]}, ${area.rgb[1]}, ${area.rgb[2]}, 1)`
+        saveButtons[i].style.backgroundColor = `rgba(${area.rgb[0]}, ${area.rgb[1]}, ${area.rgb[2]}, 1)`
+        drawButtons[i].addEventListener('mousedown', (e) => {
+            currentArea = parseInt(e.target.dataset.id, 10);
+            areas[currentArea].points = [];
+        })
+        saveButtons[i].addEventListener('mousedown', (e) => {
+            currentArea = -1;
+            socket.send(JSON.stringify({
+                "event": "updateAreas",
+                "data": areas
+            }));
+        })
     })
 }
 

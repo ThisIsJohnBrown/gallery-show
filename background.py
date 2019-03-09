@@ -60,11 +60,9 @@ def on_error(ws, error):
 
 def on_close(ws):
     print("### closed ###")
+    time.sleep(5)
     socket_open = False
-    while(socket_open is False):
-        print("reconnecting")
-        time.sleep(5)
-        socket = init_socket()
+    init_socket()
 
 
 def on_open(ws):
@@ -73,18 +71,24 @@ def on_open(ws):
 
 
 def init_socket():
+    print('init_socket')
+    global socket
     socket = websocket.WebSocketApp("ws://" + ('localhost' if args.hostname is None else args.hostname) + ":8080",
                                     on_message=on_message,
                                     on_error=on_error,
                                     on_close=on_close,
                                     on_open=on_open)
-    socket.run_forever()
+    wst = threading.Thread(target=socket.run_forever)
+    wst.receive_messages = 1
+    wst.daemon = True
+    wst.start()
     return socket
 
 
-while(socket_open is False):
-    socket = init_socket()
-    time.sleep(5)
+# while(socket_open is False):
+#     socket = init_socket()
+#     time.sleep(5)
+socket = init_socket()
 
 while(1):
     ret, frame = cap.read()
@@ -139,7 +143,7 @@ while(1):
 
     encoded, buffer = cv2.imencode('.jpg', cam_return)
     jpg_as_text = base64.b64encode(buffer)
-    if socket_open:
+    try:
         socket.send(json.dumps({
             "event": "camUpdate",
             "data": {
@@ -147,6 +151,10 @@ while(1):
                 "movement": coordinates
             }
         }))
+    except:
+        pass
+
+    time.sleep(1/10)
 
     # if len(coordinates):
     #     print(coordinates)
