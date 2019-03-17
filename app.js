@@ -17,6 +17,42 @@ const WebSocket = require('ws');
 
 const { spawn } = require('child_process');
 
+// sudo nmap -sP 192.168.7.0/24 | awk '/^Nmap/{ip=$NF}/B8:27:EB/{print ip}'
+const process = spawn('sh', ['-c', "nmap -sP 192.168.7.0/24"]);
+
+// sh -c nmap -sP 192.168.7.0/24 | awk '/^Nmap/{ip=$NF}/B8:27:EB/{print ip}'
+
+// const nmap = spawn('nmap', ['-sP', '192.168.7.0/24']);
+// const awk = spawn('awk', ["'/^Nmap/{ip=$NF}/B8:27:EB/{print ip}'"]);
+// nmap.stdout.pipe(awk.stdin);
+
+// const ips = spawn('nmap', ['-sP', '192.168.7.0/24', '|', 'awk', "'/^Nmap/{ip=$NF}/B8:27:EB/{print ip}'"]);
+
+let ipString = '';
+
+process.stdout.on('data', (data) => {
+  ipString += data.toString();
+  // console.log(`stdout: ${}`);
+  // const dataString = data.toString();
+  // const dataParts = dataString.toString().split('Nmap scan report for ')
+  // dataParts.slice(1).forEach((part) => {
+  //   console.log(part.split('\n')[0]);
+  // })
+
+});
+
+process.on('close', (data) => {
+  console.log(ipString);
+
+  const regex = /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/gm;
+  var results = ipString.match(regex);
+  console.log(results);
+});
+
+process.stderr.on('data', (data) => {
+  console.log(`stderr: ${data}`);
+});
+
 let shapeData = JSON.parse(fs.readFileSync('shape_config.json'))
 let currentMovement = [];
 
@@ -157,5 +193,7 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
 
 module.exports = app;
