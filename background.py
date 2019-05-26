@@ -19,13 +19,14 @@ parser = ArgumentParser()
 parser.add_argument("-n", "--no-image", dest="no_image")
 parser.add_argument("-t", "--show-threshold", dest="show_threshold")
 parser.add_argument("-o", "--show-outlines", dest="show_outlines")
+parser.add_argument("-s", "--show-shapes", dest="show_shapes")
 parser.add_argument("--hostname", dest="hostname")
 args = parser.parse_args()
 
 width = 640
 height = 480
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
@@ -106,8 +107,9 @@ while(1):
     for sh in shapes:
         sha = np.array(sh["points"], np.int32)
         sha = sha.reshape((-1, 1, 2))
-        cv2.polylines(cam_return, [sha], True,
-                      (int(sh["rgb"][2]), int(sh["rgb"][1]), int(sh["rgb"][0])), 4)
+        if args.show_shapes:
+            cv2.polylines(cam_return, [sha], True,
+                          (int(sh["rgb"][2]), int(sh["rgb"][1]), int(sh["rgb"][0])), 4)
 
     coordinates = []
     for con in contours:

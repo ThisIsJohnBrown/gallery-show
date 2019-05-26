@@ -6,6 +6,70 @@ const logger = require('morgan');
 const sassMiddleware = require('node-sass-middleware');
 const fs = require('fs');
 const util = require("util");
+var async = require('async');
+var lame = require('lame');
+var Speaker = require('speaker');
+var volume = require("pcm-volume");
+
+let shapeData = JSON.parse(fs.readFileSync('shape_config.json'))
+let currentMovement = [];
+
+var audioOptions = {
+  channels: 2,
+  bitDepth: 16,
+  sampleRate: 44100,
+  mode: lame.STEREO
+};
+
+
+var song = 'public/audio/background.mp3';
+
+function playStream(input, options) {
+  var decoder = lame.Decoder();
+  options = options || {};
+  var v = new volume();
+  if (options.volume) {
+    v.setVolume(options.volume);
+  }
+  var speaker = new Speaker(audioOptions);
+  // speaker.on('finish', function () {
+  //   console.log('finish!');
+  //   if (options.loop) {
+  //     console.log('loop');
+  //     // i want to restart here
+  //     start();
+  //   }
+  // });
+  function start() {
+    //input.pos = 0;
+    console.dir(input);
+    v.pipe(speaker);
+    decoder.pipe(v);
+    input.pipe(decoder);
+  }
+  start();
+
+  return v;
+}
+
+var inputStream = fs.createReadStream(song);
+
+let v = playStream(inputStream, {
+  volume: 1,
+  loop: true
+});
+
+setSound = () => {
+  // console.log('setSound: ', currentMovement.length, v.volume);
+  if (v.volume >= 0 && currentMovement.length === 0) {
+    v.setVolume(v.volume - .01);
+  } else if (v.volume < 1 && currentMovement.length > 0) {
+    v.setVolume(v.volume + .01);
+  }
+  setTimeout(setSound, 30);
+}
+
+setSound();
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -17,44 +81,22 @@ const WebSocket = require('ws');
 
 const { spawn } = require('child_process');
 
-// sudo nmap -sP 192.168.7.0/24 | awk '/^Nmap/{ip=$NF}/B8:27:EB/{print ip}'
-const process = spawn('sh', ['-c', "nmap -sP 192.168.7.0/24"]);
+// const process = spawn('sh', ['-c', "nmap -sP 192.168.7.0/24"]);
+// let ipString = '';
+// process.stdout.on('data', (data) => {
+//   ipString += data.toString();
 
-// sh -c nmap -sP 192.168.7.0/24 | awk '/^Nmap/{ip=$NF}/B8:27:EB/{print ip}'
+// });
+// process.on('close', (data) => {
+//   console.log(ipString);
 
-// const nmap = spawn('nmap', ['-sP', '192.168.7.0/24']);
-// const awk = spawn('awk', ["'/^Nmap/{ip=$NF}/B8:27:EB/{print ip}'"]);
-// nmap.stdout.pipe(awk.stdin);
-
-// const ips = spawn('nmap', ['-sP', '192.168.7.0/24', '|', 'awk', "'/^Nmap/{ip=$NF}/B8:27:EB/{print ip}'"]);
-
-let ipString = '';
-
-process.stdout.on('data', (data) => {
-  ipString += data.toString();
-  // console.log(`stdout: ${}`);
-  // const dataString = data.toString();
-  // const dataParts = dataString.toString().split('Nmap scan report for ')
-  // dataParts.slice(1).forEach((part) => {
-  //   console.log(part.split('\n')[0]);
-  // })
-
-});
-
-process.on('close', (data) => {
-  console.log(ipString);
-
-  const regex = /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/gm;
-  var results = ipString.match(regex);
-  console.log(results);
-});
-
-process.stderr.on('data', (data) => {
-  console.log(`stderr: ${data}`);
-});
-
-let shapeData = JSON.parse(fs.readFileSync('shape_config.json'))
-let currentMovement = [];
+//   const regex = /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/gm;
+//   var results = ipString.match(regex);
+//   console.log(results);
+// });
+// process.stderr.on('data', (data) => {
+//   console.log(`stderr: ${data}`);
+// });
 
 const wss = new WebSocket.Server({
   port: 8080,
@@ -68,19 +110,34 @@ const wss = new WebSocket.Server({
     zlibInflateOptions: {
       chunkSize: 10 * 1024
     },
-    // Other options settable:
-    clientNoContextTakeover: true, // Defaults to negotiated value.
-    serverNoContextTakeover: true, // Defaults to negotiated value.
-    serverMaxWindowBits: 10, // Defaults to negotiated value.
-    // Below options specified as default values.
-    concurrencyLimit: 10, // Limits zlib concurrency for perf.
-    threshold: 1024 // Size (in bytes) below which messages
-    // should not be compressed.
+// Other options settable:
+    clientNoContextTakeover: true,// Defaults to negotiated value.
+    serverNoContextTakeover: true,// Defaults to negotiated value.
+    serverMaxWindowBits: 10,// Defaults to negotiated value.
+// Below options specified as default values.
+    concurrencyLimit: 10,// Limits zlib concurrency for perf.
+    threshold: 1024// Size (in bytes) below which messages
+// should not be compressed.
   }
 });
 
+let videoIps = {};
+
+updateIps = () => {
+  // console.log(Object.keys(videoIps));
+  wss.clients.forEach(function each(client) {
+    client.send(JSON.stringify({
+      event: 'updateIps',
+      data: Object.keys(videoIps)
+    }))
+  });
+}
+
 wss.on('connection', function connection(ws) {
   console.log('user found!')
+
+
+
   ws.send(JSON.stringify({
     event: "shapeData",
     data: shapeData
@@ -92,11 +149,20 @@ wss.on('connection', function connection(ws) {
     if (data.event === 'updateAreas') {
       shapeData = data.data;
       fs.writeFileSync('shape_config.json', JSON.stringify(shapeData))
-    } else if (data.event === 'connectInfo') {
+    } else if (data.event === 'flashScreen') {
+      console.log(data.data.id);
+    } else if (data.event === 'videoConnectInfo') {
       const keys = Object.keys(data.data)
       keys.forEach((key) => {
         this[key] = data.data[key];
       })
+
+      const regex = /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/gm;
+      var ip = this._socket.remoteAddress.match(regex);
+      if (ip.length) {
+        videoIps[ip[0]] = this;
+      }
+      updateIps();
     } else if (data.event === 'camUpdate') {
       for (let i = 0; i < shapeData.length; i++) {
         const inNew = data.data.movement.indexOf(i) !== -1;
@@ -113,7 +179,13 @@ wss.on('connection', function connection(ws) {
           };
         }
       }
-      currentMovement = data.data.movement
+      currentMovement = data.data.movement;
+
+      // if (oldMovements.length === 0 && currentMovements.length > 0) {
+      //   fadeInSound();
+      // } else if (currentMovements.length === 0 && oldMovements.length > 0) {
+      //   fadeOutSound();
+      // }
     }
     wss.clients.forEach(function each(client) {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
@@ -135,6 +207,17 @@ wss.on('connection', function connection(ws) {
   });
 });
 
+// setInterval(() => {
+//   wss.clients.forEach(function each(client) {
+//     client.send(JSON.stringify({
+//       event: 'test',
+//       data: {
+//         'foo': 'bar'
+//       }
+//     }))
+//   });
+// }, 1000);
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
@@ -150,7 +233,7 @@ app.use(sassMiddleware({
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-var storage = multer.diskStorage({
+var videoStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'public/videos/')
   },
@@ -159,19 +242,44 @@ var storage = multer.diskStorage({
   }
 })
 
-var upload = multer({
-  storage: storage,
+var audioStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/audio/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, 'background.mp3')
+  }
+})
+
+var videoUpload = multer({
+  storage: videoStorage,
   fileFilter: function (req, file, cb) {
+    console.log(`uploading a ${file.mimetype} file`);
     if (file.mimetype !== 'video/mp4') {
       req.fileValidationError = 'goes wrong on the mimetype';
       return cb(null, false, new Error('goes wrong on the mimetype'));
     }
     cb(null, true);
-
   }
 })
 
-app.post('/uploadFile', upload.single('video'), function (req, res, next) {
+var audioUpload = multer({
+  storage: audioStorage,
+  fileFilter: function (req, file, cb) {
+    console.log(`uploading a ${file.mimetype} file`);
+    if (file.mimetype !== 'audio/mp3') {
+      req.fileValidationError = 'goes wrong on the mimetype';
+      return cb(null, false, new Error('goes wrong on the mimetype'));
+    }
+    cb(null, true);
+  }
+})
+
+app.post('/uploadVideo', videoUpload.single('video'), function (req, res, next) {
+  res.redirect(req.headers.referer);
+})
+
+app.post('/uploadAudio', audioUpload.single('audio'), function (req, res, next) {
   res.redirect(req.headers.referer);
 })
 

@@ -1,30 +1,3 @@
-body {
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  background-color: grey; }
-
-a {
-  color: #00B7FF; }
-
-.grid-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1.2fr;
-  grid-template-rows: 0.5fr 1.5fr;
-  grid-template-areas: "video-holder video-holder buttons" "video-holder video-holder buttons"; }
-
-.video-holder {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
-  grid-template-areas: ".";
-  grid-area: video-holder; }
-
-.buttons {
-  display: grid;
-  grid-template-columns: 1.4fr 0.6fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr;
-  grid-template-areas: ". ." ". ." ". ." ". .";
-  grid-area: buttons; }
-
 .video-full {
   position: absolute;
   top: 0;
@@ -36,13 +9,26 @@ a {
 .video {
   background: black; }
 
-.video-container {
+.video-screen {
+  background: white;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 3s; }
+  .video-screen.flash {
+    transition: opacity 0.2s;
+    opacity: 1; }
+
+.video-container, .audio-container {
   display: grid;
   grid-gap: 15px;
   grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); }
-  .video-container video {
+  .video-container video, .audio-container video {
     width: 100%; }
-  .video-container .video-wrapper {
+  .video-container .video-wrapper, .video-container .audio-wrapper, .audio-container .video-wrapper, .audio-container .audio-wrapper {
     transition: background-color .3s; }
 
 .inputfile {
@@ -52,143 +38,5 @@ a {
   overflow: hidden;
   position: absolute;
   z-index: -1; }
-
-.inputfile + label {
-  background: none;
-  font: inherit;
-  line-height: 1;
-  padding: 1em 0;
-  transition: 0.5s;
-  display: inline-block;
-  width: 100%;
-  text-align: center; }
-
-.video-wrapper {
-  border: 2px solid;
-  border-style: dashed solid;
-  padding: 1em;
-  margin: 1em;
-  border-radius: 2em;
-  background-color: rgba(255, 0, 0, 0.3); }
-  .video-wrapper .inputfile + label {
-    color: white;
-    background-color: yellow; }
-  .video-wrapper .inputfile:focus + label,
-  .video-wrapper .inputfile + label:hover {
-    border-color: yellow;
-    color: black;
-    box-shadow: inset 0 0 0 2em red; }
-  .video-wrapper.highlight {
-    background-color: red; }
-
-.draw-button, .save-button {
-  transition: 0.25s;
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin: 1em;
-  border-radius: 1em; }
-  .draw-button:hover, .save-button:hover {
-    box-shadow: inset 0 0 0 1em black; }
-
-.video-wrapper:nth-child(1) {
-  border: 2px solid;
-  border-style: dashed solid;
-  padding: 1em;
-  margin: 1em;
-  border-radius: 2em;
-  background-color: rgba(88, 77, 86, 0.3); }
-  .video-wrapper:nth-child(1) .inputfile + label {
-    color: white;
-    background-color: black;
-    cursor: pointer; }
-  .video-wrapper:nth-child(1) .inputfile:focus + label,
-  .video-wrapper:nth-child(1) .inputfile + label:hover {
-    border-color: black;
-    color: black;
-    box-shadow: inset 0 0 0 2em #584d56; }
-  .video-wrapper:nth-child(1).highlight {
-    background-color: #584d56; }
-
-.draw-button:eq(1) {
-  background-color: #584d56; }
-
-.save-button:eq(1) {
-  background-color: #584d56; }
-
-.video-wrapper:nth-child(2) {
-  border: 2px solid;
-  border-style: dashed solid;
-  padding: 1em;
-  margin: 1em;
-  border-radius: 2em;
-  background-color: rgba(60, 110, 113, 0.3); }
-  .video-wrapper:nth-child(2) .inputfile + label {
-    color: white;
-    background-color: black;
-    cursor: pointer; }
-  .video-wrapper:nth-child(2) .inputfile:focus + label,
-  .video-wrapper:nth-child(2) .inputfile + label:hover {
-    border-color: black;
-    color: black;
-    box-shadow: inset 0 0 0 2em #3c6e71; }
-  .video-wrapper:nth-child(2).highlight {
-    background-color: #3c6e71; }
-
-.draw-button:eq(2) {
-  background-color: #3c6e71; }
-
-.save-button:eq(2) {
-  background-color: #3c6e71; }
-
-.video-wrapper:nth-child(3) {
-  border: 2px solid;
-  border-style: dashed solid;
-  padding: 1em;
-  margin: 1em;
-  border-radius: 2em;
-  background-color: rgba(190, 238, 98, 0.3); }
-  .video-wrapper:nth-child(3) .inputfile + label {
-    color: white;
-    background-color: black;
-    cursor: pointer; }
-  .video-wrapper:nth-child(3) .inputfile:focus + label,
-  .video-wrapper:nth-child(3) .inputfile + label:hover {
-    border-color: black;
-    color: black;
-    box-shadow: inset 0 0 0 2em #beee62; }
-  .video-wrapper:nth-child(3).highlight {
-    background-color: #beee62; }
-
-.draw-button:eq(3) {
-  background-color: #beee62; }
-
-.save-button:eq(3) {
-  background-color: #beee62; }
-
-.video-wrapper:nth-child(4) {
-  border: 2px solid;
-  border-style: dashed solid;
-  padding: 1em;
-  margin: 1em;
-  border-radius: 2em;
-  background-color: rgba(244, 116, 59, 0.3); }
-  .video-wrapper:nth-child(4) .inputfile + label {
-    color: white;
-    background-color: black;
-    cursor: pointer; }
-  .video-wrapper:nth-child(4) .inputfile:focus + label,
-  .video-wrapper:nth-child(4) .inputfile + label:hover {
-    border-color: black;
-    color: black;
-    box-shadow: inset 0 0 0 2em #f4743b; }
-  .video-wrapper:nth-child(4).highlight {
-    background-color: #f4743b; }
-
-.draw-button:eq(4) {
-  background-color: #f4743b; }
-
-.save-button:eq(4) {
-  background-color: #f4743b; }
 
 /*# sourceMappingURL=style.css.map */

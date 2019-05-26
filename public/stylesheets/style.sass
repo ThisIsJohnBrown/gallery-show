@@ -1,29 +1,29 @@
-body
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
-  background-color: grey
+// body
+//   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
+//   background-color: grey
 
-a
-  color: #00B7FF
+// a
+//   color: #00B7FF
 
-.grid-container
-  display: grid;
-  grid-template-columns: 1fr 1fr 1.2fr;
-  grid-template-rows: 0.5fr 1.5fr;
-  grid-template-areas: "video-holder video-holder buttons" "video-holder video-holder buttons";
+// .grid-container
+//   display: grid;
+//   grid-template-columns: 1fr 1fr 1.2fr;
+//   grid-template-rows: 0.5fr 1.5fr;
+//   grid-template-areas: "video-holder video-holder buttons" "video-holder video-holder buttons";
 
-.video-holder
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
-  grid-template-areas: ".";
-  grid-area: video-holder;
+// .video-holder
+//   display: grid;
+//   grid-template-columns: 1fr;
+//   grid-template-rows: 1fr;
+//   grid-template-areas: ".";
+//   grid-area: video-holder;
 
-.buttons
-  display: grid;
-  grid-template-columns: 1.4fr 0.6fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr;
-  grid-template-areas: ". ." ". ." ". ." ". .";
-  grid-area: buttons;
+// .buttons
+//   display: grid;
+//   grid-template-columns: 1.4fr 0.6fr;
+//   grid-template-rows: 1fr 1fr 1fr 1fr;
+//   grid-template-areas: ". ." ". ." ". ." ". .";
+//   grid-area: buttons;
 
 .video-full
   position: absolute
@@ -36,13 +36,26 @@ a
 .video
   background: black
 
-.video-container
+.video-screen
+  background: white
+  width: 100%
+  height: 100%
+  position: absolute
+  top: 0
+  left: 0
+  opacity: 0
+  transition: opacity 3s
+  &.flash
+    transition: opacity 0.2s
+    opacity: 1
+
+.video-container, .audio-container
   display: grid;
   grid-gap: 15px;
   grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
   video
     width: 100%;
-  .video-wrapper
+  .video-wrapper, .audio-wrapper
     transition: background-color .3s;
 
 .inputfile
@@ -53,70 +66,64 @@ a
 	position: absolute;
 	z-index: -1;
 
-.inputfile + label
-  background: none;
-  font: inherit;
-  line-height: 1;
-  padding: 1em 0;
-  transition: 0.5s;
-  display: inline-block;
-  width: 100%
-  text-align: center
+// .video-wrapper, .audio-wrapper
+//   border: 2px solid;
+//   border-style: dashed solid;
+//   padding: 1em;
+//   margin: 1em;
+//   border-radius: 2em;
+//   background-color: rgba(red, .3);
+//   .inputfile + label
+//     color: white;
+//     background-color: yellow;
+//   .inputfile:focus + label,
+//   .inputfile + label:hover
+//     border-color: yellow;
+//     color: black;
+//     box-shadow: inset 0 0 0 2em red;
+//   &.highlight
+//     background-color: red 
+//   h2 a
+//     color: black
+//     &:hover
+//       color: blue
 
-.video-wrapper
-  border: 2px solid;
-  border-style: dashed solid;
-  padding: 1em;
-  margin: 1em;
-  border-radius: 2em;
-  background-color: rgba(red, .3);
-  .inputfile + label
-    color: white;
-    background-color: yellow;
-  .inputfile:focus + label,
-  .inputfile + label:hover
-    border-color: yellow;
-    color: black;
-    box-shadow: inset 0 0 0 2em red;
-  &.highlight
-    background-color: red 
-
-.draw-button, .save-button
-  transition: 0.25s;
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin: 1em;
-  border-radius: 1em;
-  &:hover
-    box-shadow: inset 0 0 0 1em black;
+// // .draw-button, .save-button
+// //   transition: 0.25s;
+// //   background: none;
+// //   border: none;
+// //   cursor: pointer;
+// //   margin: 1em;
+// //   border-radius: 1em;
+// //   &:hover
+// //     box-shadow: inset 0 0 0 1em black;
 
 
-$colors-list: (rgb(88, 77, 86), black), (rgb(60, 110, 113), black), (rgb(190, 238, 98), black), (rgb(244, 116, 59), black);
+// $colors-list: (rgb(88, 77, 86), black), (rgb(60, 110, 113), black), (rgb(190, 238, 98), black), (rgb(244, 116, 59), black);
 
-@for $i from 1 through length($colors-list)
-  .video-wrapper:nth-child(#{$i})
-    border: 2px solid;
-    border-style: dashed solid;
-    padding: 1em;
-    margin: 1em;
-    border-radius: 2em;
-    background-color: rgba(nth(nth($colors-list, $i), 1), .3);
-    .inputfile + label
-      color: white;
-      background-color: nth(nth($colors-list, $i), 2);
-      cursor: pointer;
-    .inputfile:focus + label,
-    .inputfile + label:hover
-      border-color: nth(nth($colors-list, $i), 2);
-      color: black;
-      box-shadow: inset 0 0 0 2em nth(nth($colors-list, $i), 1);
-    &.highlight
-      background-color: nth(nth($colors-list, $i), 1)
-  .draw-button:eq(#{$i})
-    background-color: nth(nth($colors-list, $i), 1) 
-  .save-button:eq(#{$i})
-    background-color: nth(nth($colors-list, $i), 1) 
+// @for $i from 1 through length($colors-list)
+//   .video-wrapper:nth-child(#{$i})
+//     border: 2px solid;
+//     border-style: dashed solid;
+//     padding: 1em;
+//     margin: 1em;
+//     border-radius: 2em;
+//     background-color: rgba(nth(nth($colors-list, $i), 1), .3);
+//     .inputfile + label
+//       color: white;
+//       background-color: nth(nth($colors-list, $i), 2);
+//       cursor: pointer;
+//     .inputfile:focus + label,
+//     .inputfile + label:hover
+//       border-color: nth(nth($colors-list, $i), 2);
+//       color: black;
+//       box-shadow: inset 0 0 0 2em nth(nth($colors-list, $i), 1);
+//     &.highlight
+//       background-color: nth(nth($colors-list, $i), 1)
+//   // .draw-button:eq(#{$i})
+//   //   background-color: nth(nth($colors-list, $i), 1) 
+//   // .save-button:eq(#{$i})
+//   //   background-color: nth(nth($colors-list, $i), 1) 
       
 
 
