@@ -131,7 +131,6 @@ for (let i = 0; i < audioFileUploads.length; i++) {
 
 function fileChange(e) {
     const id = getClosest(e.target, '.js-upload-form').dataset.id;
-    console.log(getClosest(e.target, '.js-upload-form'));
     const file = e.target.files[0];
     handleFiles(file, id);
 }

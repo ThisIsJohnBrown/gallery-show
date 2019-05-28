@@ -8,68 +8,68 @@ const fs = require('fs');
 const util = require("util");
 var async = require('async');
 var lame = require('lame');
-var Speaker = require('speaker');
-var volume = require("pcm-volume");
+// var Speaker = require('speaker');
+// var volume = require("pcm-volume");
 
 let shapeData = JSON.parse(fs.readFileSync('shape_config.json'))
 let currentMovement = [];
 
-var audioOptions = {
-  channels: 2,
-  bitDepth: 16,
-  sampleRate: 44100,
-  mode: lame.STEREO
-};
+// var audioOptions = {
+//   channels: 2,
+//   bitDepth: 16,
+//   sampleRate: 44100,
+//   mode: lame.STEREO
+// };
 
 
-var song = 'public/audio/background.mp3';
+// var song = 'public/audio/background.mp3';
 
-function playStream(input, options) {
-  var decoder = lame.Decoder();
-  options = options || {};
-  var v = new volume();
-  if (options.volume) {
-    v.setVolume(options.volume);
-  }
-  var speaker = new Speaker(audioOptions);
-  // speaker.on('finish', function () {
-  //   console.log('finish!');
-  //   if (options.loop) {
-  //     console.log('loop');
-  //     // i want to restart here
-  //     start();
-  //   }
-  // });
-  function start() {
-    //input.pos = 0;
-    console.dir(input);
-    v.pipe(speaker);
-    decoder.pipe(v);
-    input.pipe(decoder);
-  }
-  start();
+// function playStream(input, options) {
+//   var decoder = lame.Decoder();
+//   options = options || {};
+//   var v = new volume();
+//   if (options.volume) {
+//     v.setVolume(options.volume);
+//   }
+//   var speaker = new Speaker(audioOptions);
+//   speaker.on('finish', function () {
+//     console.log('finish!');
+//     if (options.loop) {
+//       console.log('loop');
+//       // i want to restart here
+//       start();
+//     }
+//   });
+//   function start() {
+//     //input.pos = 0;
+//     console.dir(input);
+//     v.pipe(speaker);
+//     decoder.pipe(v);
+//     input.pipe(decoder);
+//   }
+//   start();
 
-  return v;
-}
+//   return v;
+// }
 
-var inputStream = fs.createReadStream(song);
+// var inputStream = fs.createReadStream(song);
 
-let v = playStream(inputStream, {
-  volume: 1,
-  loop: true
-});
+// let v = playStream(inputStream, {
+//   volume: 1,
+//   loop: true
+// });
 
-setSound = () => {
-  // console.log('setSound: ', currentMovement.length, v.volume);
-  if (v.volume >= 0 && currentMovement.length === 0) {
-    v.setVolume(v.volume - .01);
-  } else if (v.volume < 1 && currentMovement.length > 0) {
-    v.setVolume(v.volume + .01);
-  }
-  setTimeout(setSound, 30);
-}
+// setSound = () => {
+//   // console.log('setSound: ', currentMovement.length, v.volume);
+//   if (v.volume >= 0 && currentMovement.length === 0) {
+//     v.setVolume(v.volume - .01);
+//   } else if (v.volume < 1 && currentMovement.length > 0) {
+//     v.setVolume(v.volume + .01);
+//   }
+//   setTimeout(setSound, 30);
+// }
 
-setSound();
+// setSound();
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -110,14 +110,14 @@ const wss = new WebSocket.Server({
     zlibInflateOptions: {
       chunkSize: 10 * 1024
     },
-// Other options settable:
+    // Other options settable:
     clientNoContextTakeover: true,// Defaults to negotiated value.
     serverNoContextTakeover: true,// Defaults to negotiated value.
     serverMaxWindowBits: 10,// Defaults to negotiated value.
-// Below options specified as default values.
+    // Below options specified as default values.
     concurrencyLimit: 10,// Limits zlib concurrency for perf.
     threshold: 1024// Size (in bytes) below which messages
-// should not be compressed.
+    // should not be compressed.
   }
 });
 
@@ -191,7 +191,8 @@ wss.on('connection', function connection(ws) {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
         if (data.event === 'camUpdate' && client.camera === false) {
           let moveData = updatedMovement[client.videoId];
-          if (moveData.event) {
+          // console.log(moveData);
+          if (moveData) {
             client.send(JSON.stringify({
               event: moveData.event,
               data: {
@@ -254,7 +255,7 @@ var audioStorage = multer.diskStorage({
 var videoUpload = multer({
   storage: videoStorage,
   fileFilter: function (req, file, cb) {
-    console.log(`uploading a ${file.mimetype} file`);
+    console.log(`uploading a ${file.mimetype} file, video`);
     if (file.mimetype !== 'video/mp4') {
       req.fileValidationError = 'goes wrong on the mimetype';
       return cb(null, false, new Error('goes wrong on the mimetype'));
@@ -266,7 +267,7 @@ var videoUpload = multer({
 var audioUpload = multer({
   storage: audioStorage,
   fileFilter: function (req, file, cb) {
-    console.log(`uploading a ${file.mimetype} file`);
+    console.log(`uploading a ${file.mimetype} file, audio`);
     if (file.mimetype !== 'audio/mp3') {
       req.fileValidationError = 'goes wrong on the mimetype';
       return cb(null, false, new Error('goes wrong on the mimetype'));
