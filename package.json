@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "fuser -k 8080/tcp; nodemon ./bin/www --config .nodemonConfig.json"
+    "startServer": "fuser -k 8080/tcp; node ./bin/www;"
   },
   "dependencies": {
     "body-parser": "1.18.3",

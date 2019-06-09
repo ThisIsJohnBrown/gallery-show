@@ -154,9 +154,7 @@ for (let i = 0; i < audioFileUploads.length; i++) {
 function fileChange(e) {
     const id = getClosest(e.target, '.js-upload-form').dataset.id;
     const progressBar = document.querySelectorAll('.js-progress-bar')[id];
-    console.log(progressBar);
     progressBar.classList.add('mdc-linear-progress--indeterminate')
-    console.log(getClosest(e.target, '.js-upload-form'));
     const file = e.target.files[0];
     handleFiles(file, id);
 }

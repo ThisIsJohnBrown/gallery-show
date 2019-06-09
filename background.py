@@ -8,14 +8,15 @@ import websocket
 from shapely.geometry import Polygon
 from argparse import ArgumentParser
 
+
 try:
     import thread
 except ImportError:
     import _thread as thread
 import threading
 
-
 parser = ArgumentParser()
+parser.add_argument("--pi", dest="pi")
 parser.add_argument("--no-image", dest="no_image")
 parser.add_argument("--show-threshold", dest="show_threshold")
 parser.add_argument("--show-outlines", dest="show_outlines")
@@ -24,6 +25,17 @@ parser.add_argument("--debounce-sensitivity",
                     dest="debounce_sensitivity", type=int, default=4)
 parser.add_argument("--hostname", dest="hostname")
 args = parser.parse_args()
+
+if args.pi:
+    import pygame
+    pygame.mixer.pre_init(frequency=22500, size=-16, channels=1, buffer=4096)
+    pygame.init()
+    pygame.mixer.init()
+    pygame.mixer.music.load(
+        '/home/pi/gallery-show/public/audio/background.mp3')
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(0)
+
 recalibrationNeeded = False
 
 width = 320
@@ -31,6 +43,8 @@ height = 240
 
 debounce = [0, 0, 0, 0]
 debounce_triggered = [False, False, False, False]
+
+soundPlaying = False
 
 cap = cv2.VideoCapture(0)
 
@@ -196,6 +210,10 @@ while(1):
 
     encoded, buffer = cv2.imencode('.jpg', cam_return)
     jpg_as_text = base64.b64encode(buffer)
+    if len(coordinates) > 0 and soundPlaying is False:
+        soundPlaying = True
+    elif len(coordinates) is 0 and soundPlaying is True:
+        soundPlaying = False
     try:
         socket.send(json.dumps({
             "event": "camUpdate",
@@ -207,19 +225,13 @@ while(1):
     except:
         pass
 
+    if args.pi:
+        currVolume = pygame.mixer.music.get_volume()
+        if soundPlaying is True and currVolume < 1:
+            pygame.mixer.music.set_volume(currVolume + .06)
+        elif soundPlaying is False and currVolume > 0:
+            pygame.mixer.music.set_volume(currVolume - .06)
     time.sleep(1/10)
-
-    # if len(coordinates):
-    #     print(coordinates)
-    # websocket.send(json.dumps({
-    #     "event": "movement",
-    #     "data": ','.join(str(e) for e in coordinates)
-    # }))
-
-    # vertical_concat=np.concatenate((frame, thresh), axis=0)
-
-    # cv2.imshow('frame', vertical_concat)
-    # cv2.imshow('frame1',thresh)
 
     k = cv2.waitKey(30) & 0xff
     if k == 27:

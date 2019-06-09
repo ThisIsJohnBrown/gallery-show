@@ -7,11 +7,12 @@ const sassMiddleware = require('node-sass-middleware');
 const fs = require('fs');
 const util = require("util");
 var async = require('async');
-// var lame = require('lame');
-// var Speaker = require('speaker');
-// var volume = require("pcm-volume");
+var lame = require('lame');
+var debug = require('debug')('newserver:server');
+var http = require('http');
 
-let shapeData = JSON.parse(fs.readFileSync('shape_config.json'))
+// let shapeData = JSON.parse(fs.readFileSync('/home/pi/gallery-show/shape_config.json'));
+let shapeData = JSON.parse(fs.readFileSync('shape_config.json'));
 let currentMovement = [];
 
 // var audioOptions = {
@@ -78,8 +79,6 @@ const app = express();
 var multer = require('multer')
 
 const WebSocket = require('ws');
-
-const { spawn } = require('child_process');
 
 // const process = spawn('sh', ['-c', "nmap -sP 192.168.7.0/24"]);
 // let ipString = '';
@@ -191,7 +190,8 @@ wss.on('connection', function connection(ws) {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
         if (data.event === 'camUpdate' && client.camera === false) {
           let moveData = updatedMovement[client.videoId];
-          if (moveData.event) {
+          // console.log(moveData);
+          if (moveData) {
             client.send(JSON.stringify({
               event: moveData.event,
               data: {
@@ -254,7 +254,7 @@ var audioStorage = multer.diskStorage({
 var videoUpload = multer({
   storage: videoStorage,
   fileFilter: function (req, file, cb) {
-    console.log(`uploading a ${file.mimetype} file`);
+    console.log(`uploading a ${file.mimetype} file, video`);
     if (file.mimetype !== 'video/mp4') {
       req.fileValidationError = 'goes wrong on the mimetype';
       return cb(null, false, new Error('goes wrong on the mimetype'));
@@ -274,7 +274,7 @@ var videoUpload = multer({
 var audioUpload = multer({
   storage: audioStorage,
   fileFilter: function (req, file, cb) {
-    console.log(`uploading a ${file.mimetype} file`);
+    console.log(`uploading a ${file.mimetype} file, audio`);
     if (file.mimetype !== 'audio/mp3') {
       req.fileValidationError = 'goes wrong on the mimetype';
       return cb(null, false, new Error('goes wrong on the mimetype'));
@@ -284,7 +284,6 @@ var audioUpload = multer({
 })
 
 app.post('/uploadVideo', videoUpload.single('video'), function (req, res, next) {
-
   res.redirect(req.headers.referer);
 })
 
@@ -313,4 +312,44 @@ app.use(function (err, req, res, next) {
 
 
 
-module.exports = app;
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
+
+var port = process.env.PORT || '3000';
+app.set('port', port);
+
+var server = http.createServer(app);
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
