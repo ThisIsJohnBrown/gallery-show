@@ -1,57 +1,117 @@
 <h1 class="mdc-typography--headline2">Inner Voices</h1>
 
 <h3 class="mdc-typography--headline3">Live Camera</h3>
-<div class="grid-container">
-    <div class="video-holder">
-        <canvas class="js-canvas"></canvas>
-        <img class="js-stream" />
-        <div class="mdc-tab-bar" role="tablist">
-            <div class="mdc-tab-scroller">
-                <div class="mdc-tab-scroller__scroll-area mdc-tab-scroller__scroll-area--scroll"
-                    style="margin-bottom: 0px;">
-                    <div class="mdc-tab-scroller__scroll-content">
-                        <button class="mdc-tab mdc-tab--active" role="tab" aria-selected="true" tabindex="0"
-                            id="mdc-tab-4" data-id="0"><span class="mdc-tab__content"><span
-                                    class="mdc-tab__icon material-icons" aria-hidden="true">edit</span><span
-                                    class="mdc-tab__text-label">Draw Area
-                                    1</span></span><span class="mdc-tab-indicator mdc-tab-indicator--active"><span
-                                    class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"
-                                    style=""></span></span><span
-                                class="mdc-tab__ripple mdc-ripple-upgraded js-draw-button" data-id="1"
-                                style="--mdc-ripple-fg-size:239px; --mdc-ripple-fg-scale:1.72093; --mdc-ripple-fg-translate-start:146.27px, -93.7344px; --mdc-ripple-fg-translate-end:79.7109px, -95.5px;"></span></button>
-                        <button class="mdc-tab" role="tab" aria-selected="false" tabindex="-1" id="mdc-tab-5"><span
-                                class="mdc-tab__content" data-id="0"><span class="mdc-tab__icon material-icons"
-                                    aria-hidden="true">edit</span><span class="mdc-tab__text-label">Draw Area
-                                    2</span></span><span class="mdc-tab-indicator"><span
-                                    class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"
-                                    style=""></span></span><span
-                                class="mdc-tab__ripple mdc-ripple-upgraded js-draw-button" data-id="2"
-                                style="--mdc-ripple-fg-size:233px; --mdc-ripple-fg-scale:1.72844; --mdc-ripple-fg-translate-start:130.5px, -87.6563px; --mdc-ripple-fg-translate-end:78.3906px, -92.5px;"></span></button>
-                        <button class="mdc-tab" role="tab" aria-selected="false" tabindex="-1" id="mdc-tab-6"><span
-                                class="mdc-tab__content" data-id="0"><span class="mdc-tab__icon material-icons"
-                                    aria-hidden="true">edit</span><span class="mdc-tab__text-label">Draw Area
-                                    3</span></span><span class="mdc-tab-indicator"><span
-                                    class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span></span><span
-                                class="mdc-tab__ripple mdc-ripple-upgraded js-draw-button" data-id="3"></span></button>
-                        <button class="mdc-tab" role="tab" aria-selected="false" tabindex="-1" id="mdc-tab-6"><span
-                                class="mdc-tab__content" data-id="0"><span class="mdc-tab__icon material-icons"
-                                    aria-hidden="true">edit</span><span class="mdc-tab__text-label">Draw Area
-                                    4</span></span><span class="mdc-tab-indicator"><span
-                                    class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span></span><span
-                                class="mdc-tab__ripple mdc-ripple-upgraded js-draw-button" data-id="4"></span></button>
-                        <button class="mdc-tab" role="tab" aria-selected="false" tabindex="-1" id="mdc-tab-6"><span
-                                class="mdc-tab__content" data-id="0"><span class="mdc-tab__icon material-icons"
-                                    aria-hidden="true">save</span><span class="mdc-tab__text-label">Save
-                                    Areas</span></span><span class="mdc-tab-indicator"><span
-                                    class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span></span><span
-                                class="mdc-tab__ripple mdc-ripple-upgraded js-save-button" data-id="4"></span></button>
+<div class="demo-grid mdc-layout-grid">
+    <div class="mdc-layout-grid__inner">
+        <div class="demo-cell mdc-layout-grid__cell mdc-layout-grid__cell--span-4 mdc-layout-grid__cell--span-4-phone">
+            <div class="demo-grid mdc-layout-grid">
+                <ul class="mdc-list demo-list">
+                    <li class="mdc-list-item mdc-ripple-upgraded js-update-flags" data-flag="recalibrate" tabindex="0"
+                        style="--mdc-ripple-fg-size:360px; --mdc-ripple-fg-scale:1.69977; --mdc-ripple-fg-translate-start:16.5313px, -163.219px; --mdc-ripple-fg-translate-end:120px, -156px;">
+                        <span class="mdc-list-item__graphic material-icons"
+                            aria-hidden="true">camera_alt</span>Recalibrate</li>
+                    <li class="mdc-list-item mdc-ripple-upgraded js-update-flags" data-flag="no_image" tabindex="0"
+                        style="--mdc-ripple-fg-size:360px; --mdc-ripple-fg-scale:1.69977; --mdc-ripple-fg-translate-start:16.5313px, -163.219px; --mdc-ripple-fg-translate-end:120px, -156px;">
+                        <span class="mdc-list-item__graphic material-icons" aria-hidden="true">videocam_off</span>Toggle
+                        Stream</li>
+                    <li class="mdc-list-item mdc-ripple-upgraded js-update-flags" data-flag="show_threshold"
+                        tabindex="-1"
+                        style="--mdc-ripple-fg-size:360px; --mdc-ripple-fg-scale:1.69977; --mdc-ripple-fg-translate-start:16.3086px, -168.336px; --mdc-ripple-fg-translate-end:120px, -156px;">
+                        <span class="mdc-list-item__graphic material-icons"
+                            aria-hidden="true">invert_colors_off</span>Toggle
+                        Threshold</li>
+                    <li class="mdc-list-item mdc-ripple-upgraded js-update-flags" data-flag="show_outlines"
+                        tabindex="-1"
+                        style="--mdc-ripple-fg-size:360px; --mdc-ripple-fg-scale:1.69977; --mdc-ripple-fg-translate-start:281.758px, -138.246px; --mdc-ripple-fg-translate-end:120px, -156px;">
+                        <span class="mdc-list-item__graphic material-icons"
+                            aria-hidden="true">format_shapes</span>Toggle
+                        Outlines</li>
+                </ul>
+                <h3 class="mdc-typography--subtitle1">Min Size</h3>
+                <div class="mdc-slider mdc-slider--discrete js-mdc-slider" tabindex="0" role="slider" aria-valuemin="0"
+                    aria-valuemax="100" aria-valuenow="0" aria-label="Select Value">
+                    <div class="mdc-slider__track-container">
+                        <div class="mdc-slider__track"></div>
+                    </div>
+                    <div class="mdc-slider__thumb-container">
+                        <div class="mdc-slider__pin">
+                            <span class="mdc-slider__pin-value-marker"></span>
+                        </div>
+                        <svg class="mdc-slider__thumb" width="21" height="21">
+                            <circle cx="10.5" cy="10.5" r="7.875"></circle>
+                        </svg>
+                        <div class="mdc-slider__focus-ring"></div>
+                    </div>
+                </div>
+                <h3 class="mdc-typography--subtitle1">Max Size</h3>
+                <div class="mdc-slider mdc-slider--discrete js-mdc-slider" tabindex="0" role="slider" aria-valuemin="0"
+                    aria-valuemax="100" aria-valuenow="0" aria-label="Select Value">
+                    <div class="mdc-slider__track-container">
+                        <div class="mdc-slider__track"></div>
+                    </div>
+                    <div class="mdc-slider__thumb-container">
+                        <div class="mdc-slider__pin">
+                            <span class="mdc-slider__pin-value-marker"></span>
+                        </div>
+                        <svg class="mdc-slider__thumb" width="21" height="21">
+                            <circle cx="10.5" cy="10.5" r="7.875"></circle>
+                        </svg>
+                        <div class="mdc-slider__focus-ring"></div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="buttons">
-
+        <div class="demo-cell mdc-layout-grid__cell mdc-layout-grid__cell--span-8 mdc-layout-grid__cell--span-8-tablet">
+            <canvas class="js-canvas"></canvas>
+            <img class="js-stream" />
+            <div class="mdc-tab-bar" role="tablist">
+                <div class="mdc-tab-scroller">
+                    <div class="mdc-tab-scroller__scroll-area mdc-tab-scroller__scroll-area--scroll"
+                        style="margin-bottom: 0px;">
+                        <div class="mdc-tab-scroller__scroll-content">
+                            <button class="mdc-tab mdc-tab--active" role="tab" aria-selected="true" tabindex="0"
+                                id="mdc-tab-4" data-id="0"><span class="mdc-tab__content"><span
+                                        class="mdc-tab__icon material-icons" aria-hidden="true">edit</span><span
+                                        class="mdc-tab__text-label">Draw Area
+                                        1</span></span><span class="mdc-tab-indicator mdc-tab-indicator--active"><span
+                                        class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"
+                                        style=""></span></span><span
+                                    class="mdc-tab__ripple mdc-ripple-upgraded js-draw-button" data-id="1"
+                                    style="--mdc-ripple-fg-size:239px; --mdc-ripple-fg-scale:1.72093; --mdc-ripple-fg-translate-start:146.27px, -93.7344px; --mdc-ripple-fg-translate-end:79.7109px, -95.5px;"></span></button>
+                            <button class="mdc-tab" role="tab" aria-selected="false" tabindex="-1" id="mdc-tab-5"><span
+                                    class="mdc-tab__content" data-id="0"><span class="mdc-tab__icon material-icons"
+                                        aria-hidden="true">edit</span><span class="mdc-tab__text-label">Draw Area
+                                        2</span></span><span class="mdc-tab-indicator"><span
+                                        class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"
+                                        style=""></span></span><span
+                                    class="mdc-tab__ripple mdc-ripple-upgraded js-draw-button" data-id="2"
+                                    style="--mdc-ripple-fg-size:233px; --mdc-ripple-fg-scale:1.72844; --mdc-ripple-fg-translate-start:130.5px, -87.6563px; --mdc-ripple-fg-translate-end:78.3906px, -92.5px;"></span></button>
+                            <button class="mdc-tab" role="tab" aria-selected="false" tabindex="-1" id="mdc-tab-6"><span
+                                    class="mdc-tab__content" data-id="0"><span class="mdc-tab__icon material-icons"
+                                        aria-hidden="true">edit</span><span class="mdc-tab__text-label">Draw Area
+                                        3</span></span><span class="mdc-tab-indicator"><span
+                                        class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span></span><span
+                                    class="mdc-tab__ripple mdc-ripple-upgraded js-draw-button"
+                                    data-id="3"></span></button>
+                            <button class="mdc-tab" role="tab" aria-selected="false" tabindex="-1" id="mdc-tab-6"><span
+                                    class="mdc-tab__content" data-id="0"><span class="mdc-tab__icon material-icons"
+                                        aria-hidden="true">edit</span><span class="mdc-tab__text-label">Draw Area
+                                        4</span></span><span class="mdc-tab-indicator"><span
+                                        class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span></span><span
+                                    class="mdc-tab__ripple mdc-ripple-upgraded js-draw-button"
+                                    data-id="4"></span></button>
+                            <button class="mdc-tab" role="tab" aria-selected="false" tabindex="-1" id="mdc-tab-6"><span
+                                    class="mdc-tab__content" data-id="0"><span class="mdc-tab__icon material-icons"
+                                        aria-hidden="true">save</span><span class="mdc-tab__text-label">Save
+                                        Areas</span></span><span class="mdc-tab-indicator"><span
+                                        class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span></span><span
+                                    class="mdc-tab__ripple mdc-ripple-upgraded js-save-button"
+                                    data-id="4"></span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -65,8 +125,10 @@
         <form class="js-audio-upload-form" action="/uploadAudioFile" method="post" enctype="multipart/form-data">
             <input type="hidden" name="id" value="0" />
             <input type="file" name="video" id="file-0" class="inputfile js-audio-file" />
-            <label for="file-0" class="mdc-button mdc-button--raised">Upload new audio</label>
+            <label for="file-0" class="mdc-button">Upload new audio</label>
         </form>
+        <button class="mdc-button mdc-card__action mdc-card__action--button js-toggle-audio" data-id="0">Toggle
+            Audio</button>
     </div>
 
 </div>
@@ -81,17 +143,29 @@
                 <h2 class="demo-card__title mdc-typography mdc-typography--headline6">Video #1</h2>
             </div>
         </div>
+        <div role="progressbar" class="mdc-linear-progress js-progress-bar">
+            <div class="mdc-linear-progress__buffering-dots"></div>
+            <div class="mdc-linear-progress__buffer"></div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar ">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+        </div>
         <div class="mdc-card__actions">
             <div class="mdc-card__action-buttons">
                 <form class="js-upload-form" action="/uploadVideoFile" method="post" enctype="multipart/form-data"
                     data-id="0">
                     <input type="hidden" name="id" value="0" />
-                    <input type="file" name="video" id="file-0" class="inputfile js-file" />
-                    <label for="file-0" class="mdc-button mdc-card__action mdc-card__action--button">Upload
+                    <input type="file" name="video" id="file-1" class="inputfile js-file" />
+                    <label for="file-1" class="mdc-button mdc-card__action mdc-card__action--button">Upload
                         video</label>
                 </form>
                 <button class="mdc-button mdc-card__action mdc-card__action--button js-flash-screen" data-id="0">Flash
                     screen</button>
+                <button class="mdc-button mdc-card__action mdc-card__action--button js-reset-screen" data-id="0">Reset
+                    Screen</button>
             </div>
         </div>
     </div>
@@ -103,17 +177,29 @@
                 <h2 class="demo-card__title mdc-typography mdc-typography--headline6">Video #2</h2>
             </div>
         </div>
+        <div role="progressbar" class="mdc-linear-progress js-progress-bar">
+            <div class="mdc-linear-progress__buffering-dots"></div>
+            <div class="mdc-linear-progress__buffer"></div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar ">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+        </div>
         <div class="mdc-card__actions">
             <div class="mdc-card__action-buttons">
                 <form class="js-upload-form" action="/uploadVideoFile" method="post" enctype="multipart/form-data"
                     data-id="1">
                     <input type="hidden" name="id" value="1" />
-                    <input type="file" name="video" id="file-1" class="inputfile js-file" />
-                    <label for="file-1" class="mdc-button mdc-card__action mdc-card__action--button">Upload
+                    <input type="file" name="video" id="file-2" class="inputfile js-file" />
+                    <label for="file-2" class="mdc-button mdc-card__action mdc-card__action--button">Upload
                         video</label>
                 </form>
                 <button class="mdc-button mdc-card__action mdc-card__action--button js-flash-screen" data-id="1">Flash
                     screen</button>
+                <button class="mdc-button mdc-card__action mdc-card__action--button js-reset-screen" data-id="1">Reset
+                    Screen</button>
             </div>
         </div>
     </div>
@@ -125,17 +211,29 @@
                 <h2 class="demo-card__title mdc-typography mdc-typography--headline6">Video #3</h2>
             </div>
         </div>
+        <div role="progressbar" class="mdc-linear-progress js-progress-bar">
+            <div class="mdc-linear-progress__buffering-dots"></div>
+            <div class="mdc-linear-progress__buffer"></div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar ">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+        </div>
         <div class="mdc-card__actions">
             <div class="mdc-card__action-buttons">
                 <form class="js-upload-form" action="/uploadVideoFile" method="post" enctype="multipart/form-data"
                     data-id="2">
                     <input type="hidden" name="id" value="2" />
-                    <input type="file" name="video" id="file-2" class="inputfile js-file" />
-                    <label for="file-2" class="mdc-button mdc-card__action mdc-card__action--button">Upload
+                    <input type="file" name="video" id="file-3" class="inputfile js-file" />
+                    <label for="file-3" class="mdc-button mdc-card__action mdc-card__action--button">Upload
                         video</label>
                 </form>
                 <button class="mdc-button mdc-card__action mdc-card__action--button js-flash-screen" data-id="2">Flash
                     screen</button>
+                <button class="mdc-button mdc-card__action mdc-card__action--button js-reset-screen" data-id="2">Reset
+                    Screen</button>
             </div>
         </div>
     </div>
@@ -147,17 +245,29 @@
                 <h2 class="demo-card__title mdc-typography mdc-typography--headline6">Video #4</h2>
             </div>
         </div>
+        <div role="progressbar" class="mdc-linear-progress js-progress-bar">
+            <div class="mdc-linear-progress__buffering-dots"></div>
+            <div class="mdc-linear-progress__buffer"></div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar ">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+        </div>
         <div class="mdc-card__actions">
             <div class="mdc-card__action-buttons">
                 <form class="js-upload-form" action="/uploadVideoFile" method="post" enctype="multipart/form-data"
                     data-id="3">
                     <input type="hidden" name="id" value="3" />
-                    <input type="file" name="video" id="file-3" class="inputfile js-file" />
-                    <label for="file-3" class="mdc-button mdc-card__action mdc-card__action--button">Upload
+                    <input type="file" name="video" id="file-4" class="inputfile js-file" />
+                    <label for="file-4" class="mdc-button mdc-card__action mdc-card__action--button">Upload
                         video</label>
                 </form>
                 <button class="mdc-button mdc-card__action mdc-card__action--button js-flash-screen" data-id="3">Flash
                     screen</button>
+                <button class="mdc-button mdc-card__action mdc-card__action--button js-reset-screen" data-id="3">Reset
+                    Screen</button>
             </div>
         </div>
     </div>

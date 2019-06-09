@@ -16,30 +16,50 @@ import threading
 
 
 parser = ArgumentParser()
-parser.add_argument("-n", "--no-image", dest="no_image")
-parser.add_argument("-t", "--show-threshold", dest="show_threshold")
-parser.add_argument("-o", "--show-outlines", dest="show_outlines")
-parser.add_argument("-s", "--show-shapes", dest="show_shapes")
+parser.add_argument("--no-image", dest="no_image")
+parser.add_argument("--show-threshold", dest="show_threshold")
+parser.add_argument("--show-outlines", dest="show_outlines")
+parser.add_argument("--show-shapes", dest="show_shapes")
+parser.add_argument("--debounce-sensitivity",
+                    dest="debounce_sensitivity", type=int, default=4)
 parser.add_argument("--hostname", dest="hostname")
 args = parser.parse_args()
+recalibrationNeeded = False
 
-width = 640
-height = 480
+width = 320
+height = 240
 
-cap = cv2.VideoCapture(1)
+debounce = [0, 0, 0, 0]
+debounce_triggered = [False, False, False, False]
+
+cap = cv2.VideoCapture(0)
 
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
-cap.set(cv2.CAP_PROP_EXPOSURE, -3.0)
-fgbg = cv2.createBackgroundSubtractorMOG2(1000)
+# print(cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25))
+# cap.set(cv2.CAP_PROP_EXPOSURE, -7.0)
+fgbg = cv2.createBackgroundSubtractorMOG2(1000, 8, False)
+
+
+def list_supported_capture_properties(cap: cv2.VideoCapture):
+    """ List the properties supported by the capture device.
+    """
+    supported = list()
+    for attr in dir(cv2):
+        if attr.startswith('CAP_PROP'):
+            if cap.get(getattr(cv2, attr)) != False:
+                supported.append(attr)
+    return supported
+
+
+print(list_supported_capture_properties(cap))
+
 
 detector = cv2.SimpleBlobDetector_create()
 
 shapes = json.loads(open('shape_config.json', 'r').read())
 
 socket = None
-socket_open = False
 
 
 def update_shapes(data):
@@ -51,8 +71,17 @@ def update_shapes(data):
 
 def on_message(ws, message):
     data = json.loads(message)
+    print(data['event'])
     if data['event'] == 'shapeData' or data['event'] == 'updateAreas':
         update_shapes(data['data'])
+    if data['event'] == 'updateFlags':
+        for flag in data['data']:
+            if flag == 'recalibrate':
+                global recalibrationNeeded
+                recalibrationNeeded = True
+            else:
+                args._get_args
+                args.__dict__[flag] = not args.__dict__[flag]
 
 
 def on_error(ws, error):
@@ -62,12 +91,10 @@ def on_error(ws, error):
 def on_close(ws):
     print("### closed ###")
     time.sleep(5)
-    socket_open = False
     init_socket()
 
 
 def on_open(ws):
-    socket_open = True
     print('+++ open +++')
 
 
@@ -86,15 +113,17 @@ def init_socket():
     return socket
 
 
-# while(socket_open is False):
-#     socket = init_socket()
-#     time.sleep(5)
 socket = init_socket()
 
 while(1):
     ret, frame = cap.read()
 
-    fgmask = fgbg.apply(frame, learningRate=0.002)
+    if recalibrationNeeded:
+        print('recalibrating!')
+        fgmask = fgbg.apply(frame, learningRate=1)
+        recalibrationNeeded = False
+    else:
+        fgmask = fgbg.apply(frame, learningRate=0.002)
 
     im_gauss = cv2.GaussianBlur(fgmask, (5, 5), 0)
     ret, thresh = cv2.threshold(im_gauss, 127, 255, 0)
@@ -114,7 +143,7 @@ while(1):
     coordinates = []
     for con in contours:
         area = cv2.contourArea(con)
-        if 1000 < area:
+        if 500 < area and area < 4000:
             x, y, w, h = cv2.boundingRect(con)
             shape_num = 0
             for sh in shapes:
@@ -123,15 +152,19 @@ while(1):
                     p2 = Polygon([(x, y), (x+w, y), (x+w, y+h), (x, y+h)])
 
                     if p1.intersects(p2):
+                        if debounce[shape_num] < args.debounce_sensitivity:
+                            debounce[shape_num] = debounce[shape_num] + 2
                         coordinates.append(shape_num)
                         if args.show_outlines:
                             cv2.rectangle(cam_return, (x, y), (x+w, y+h),
                                           (int(sh["rgb"][2]), int(
-                                              sh["rgb"][1]), int(sh["rgb"][0])), 2)
-                            cv2.circle(cam_return, (int(x + w/2), int(y + h/2)),
-                                       10,
-                                       (int(sh["rgb"][2]), int(
-                                        sh["rgb"][1]), int(sh["rgb"][0])), -1)
+                                              sh["rgb"][1]), int(sh["rgb"][0])), 1)
+                            # cv2.circle(cam_return, (int(x + w/2), int(y + h/2)),
+                            #            4,
+                            #            (int(sh["rgb"][2]), int(
+                            #             sh["rgb"][1]), int(sh["rgb"][0])), -1)
+                            cv2.putText(cam_return, str(int(area / 100)), (
+                                int(x + w/2), int(y + h/2)), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 2)
 
                     # sha = np.array(sh["points"], np.int32)
                     # sha = sha.reshape((-1, 1, 2))
@@ -143,6 +176,24 @@ while(1):
                     #                10, (255, 0, 0), -1)
                 shape_num += 1
 
+    new_coordinates = []
+
+    # print(debounce)
+    # print(debounce_triggered)
+
+    for i in range(len(debounce)):
+        if debounce[i] > 0:
+            debounce[i] = debounce[i] - 1
+
+        if debounce[i] >= args.debounce_sensitivity and debounce_triggered[i] is False:
+            new_coordinates.append(i)
+            debounce_triggered[i] = True
+        elif debounce[i] > 0 and debounce_triggered[i] is True:
+            new_coordinates.append(i)
+        elif debounce[i] == 0 and debounce_triggered[i] is True:
+            debounce_triggered[i] = False
+    # for i in range(len(debounce)):
+
     encoded, buffer = cv2.imencode('.jpg', cam_return)
     jpg_as_text = base64.b64encode(buffer)
     try:
@@ -150,7 +201,7 @@ while(1):
             "event": "camUpdate",
             "data": {
                 "camData": '' if args.no_image else str(jpg_as_text),
-                "movement": coordinates
+                "movement": new_coordinates
             }
         }))
     except:

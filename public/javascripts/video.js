@@ -56,6 +56,12 @@ initSocket = () => {
                     flash = setTimeout(removeFlash, 400);
                 }
             }
+        } else if (data.event == 'newVideoUpload' || data.event == 'resetScreen') {
+            console.log('a', data.data.id, id);
+            if (parseInt(data.data.id, 10) === parseInt(id, 10)) {
+                console.log('b');
+                window.location = window.location;
+            }
         }
     }
 }

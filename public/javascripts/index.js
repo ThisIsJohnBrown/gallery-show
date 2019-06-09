@@ -3,12 +3,11 @@ const height = 480;
 
 const canvas = document.getElementsByClassName('js-canvas')[0];
 const context = canvas.getContext('2d');
-let streamImage = new Image();
+let streamImage = new Image(width, height);
 streamImage.onload = function () {
     // context.drawImage(streamImage, 0, 0);
     // drawPoints();
 };
-const imgStream = document.getElementsByClassName('js-stream')[0]
 
 canvas.width = width;
 canvas.height = height;
@@ -22,6 +21,7 @@ socket.onmessage = function (e) {
         if (data.data.camData) {
             noImage = false;
             streamImage.src = 'data:image/png;base64,' + data.data.camData.substr(2, data.data.camData.length - 3);
+
         } else {
             noImage = true;
         }
@@ -46,13 +46,13 @@ drawPoints = () => {
         if (points.length !== 0) {
             const mid = getCentroid(points);
             context.beginPath();
-            context.moveTo(points[0][0], points[0][1]);
+            context.moveTo(points[0][0] * 2, points[0][1] * 2);
             points.map((point, i) => {
                 if (i > 0) {
-                    context.lineTo(point[0], point[1]);
+                    context.lineTo(point[0] * 2, point[1] * 2);
                 }
             })
-            context.lineTo(points[0][0], points[0][1]);
+            context.lineTo(points[0][0] * 2, points[0][1] * 2);
             context.lineWidth = 4;
             context.strokeStyle = `rgba(0, 0, 0, 1)`;
             context.stroke();
@@ -65,8 +65,8 @@ drawPoints = () => {
             context.fillStyle = 'black';
             context.strokeStyle = 'white';
             context.font = '24px Roboto';
-            context.strokeText(i + 1, mid.x - 12, mid.y);
-            context.fillText(i + 1, mid.x - 12, mid.y);
+            context.strokeText(i + 1, mid.x * 2 - 12, mid.y * 2);
+            context.fillText(i + 1, mid.x * 2 - 12, mid.y * 2);
         }
     }
 
@@ -74,7 +74,7 @@ drawPoints = () => {
 
 canvas.addEventListener("mousedown", (e) => {
     if (currentArea !== -1) {
-        areas[currentArea].points.push([e.offsetX, e.offsetY])
+        areas[currentArea].points.push([e.offsetX / 2, e.offsetY / 2])
     }
 });
 
@@ -109,13 +109,35 @@ draw = () => {
     context.fillStyle = 'rgb(0, 0, 0)';
     context.fillRect(0, 0, width, height);
     if (!noImage) {
-        context.drawImage(streamImage, 0, 0);
+        context.drawImage(streamImage, 0, 0, 320, 240, 0, 0, width, height);
     }
     drawPoints();
     window.requestAnimationFrame(draw);
 }
 
 draw();
+
+var sliders = document.getElementsByClassName('js-mdc-slider');
+for (let i = 0; i < sliders.length; i++) {
+    slider = sliders[i];
+    new mdc.slider.MDCSlider(slider);
+}
+
+var updateFlags = document.getElementsByClassName('js-update-flags');
+for (let i = 0; i < updateFlags.length; i++) {
+    flag = updateFlags[i];
+    flag.addEventListener('mousedown', updateFlag, false);
+}
+
+function updateFlag(e) {
+    let data = {};
+    data[e.target.dataset.flag] = true;
+    socket.send(JSON.stringify({
+        "event": "updateFlags",
+        "data": data
+    }));
+    console.log(data);
+}
 
 var fileUploads = document.getElementsByClassName('js-file');
 for (let i = 0; i < fileUploads.length; i++) {
@@ -131,6 +153,9 @@ for (let i = 0; i < audioFileUploads.length; i++) {
 
 function fileChange(e) {
     const id = getClosest(e.target, '.js-upload-form').dataset.id;
+    const progressBar = document.querySelectorAll('.js-progress-bar')[id];
+    console.log(progressBar);
+    progressBar.classList.add('mdc-linear-progress--indeterminate')
     console.log(getClosest(e.target, '.js-upload-form'));
     const file = e.target.files[0];
     handleFiles(file, id);
@@ -174,12 +199,45 @@ for (let i = 0; i < flashScreens.length; i++) {
 
 function flashScreen(e) {
     preventDefaults(e);
-    console.log('a');
     socket.send(JSON.stringify({
         "event": "flashScreen",
         "data": {
             id: parseInt(e.target.dataset.id, 10)
         }
+    }));
+}
+
+////////////////////////////
+//  Reset Screen buttons
+////////////////////////////
+let resetScreens = document.getElementsByClassName('js-reset-screen');
+for (let i = 0; i < resetScreens.length; i++) {
+    resetScreens[i].addEventListener('click', resetScreen, false)
+}
+
+function resetScreen(e) {
+    preventDefaults(e);
+    socket.send(JSON.stringify({
+        "event": "resetScreen",
+        "data": {
+            id: parseInt(e.target.dataset.id, 10)
+        }
+    }));
+}
+
+////////////////////////////
+//  Toggle Audio buttons
+////////////////////////////
+let toggleAudios = document.getElementsByClassName('js-toggle-audio');
+for (let i = 0; i < toggleAudios.length; i++) {
+    toggleAudios[i].addEventListener('click', toggleAudio, false)
+}
+
+function toggleAudio(e) {
+    preventDefaults(e);
+    socket.send(JSON.stringify({
+        "event": "toggleAudio",
+        "data": {}
     }));
 }
 
