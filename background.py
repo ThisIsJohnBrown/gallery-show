@@ -7,6 +7,7 @@ import time
 import websocket
 from shapely.geometry import Polygon
 from argparse import ArgumentParser
+import pygame
 
 try:
     import thread
@@ -14,6 +15,13 @@ except ImportError:
     import _thread as thread
 import threading
 
+pygame.mixer.pre_init(frequency=22500, size=-16, channels=1, buffer=4096)
+pygame.init()
+pygame.mixer.init()
+pygame.mixer.music.load(
+    '/home/pi/gallery-show/public/audio/background.mp3')
+pygame.mixer.music.play(-1)
+pygame.mixer.music.set_volume(0)
 
 parser = ArgumentParser()
 parser.add_argument("-n", "--no-image", dest="no_image")
@@ -25,6 +33,7 @@ args = parser.parse_args()
 
 width = 640
 height = 480
+soundPlaying = False
 
 cap = cv2.VideoCapture(0)
 
@@ -145,6 +154,10 @@ while(1):
 
     encoded, buffer = cv2.imencode('.jpg', cam_return)
     jpg_as_text = base64.b64encode(buffer)
+    if len(coordinates) > 0 and soundPlaying is False:
+        soundPlaying = True
+    elif len(coordinates) is 0 and soundPlaying is True:
+        soundPlaying = False
     try:
         socket.send(json.dumps({
             "event": "camUpdate",
@@ -156,19 +169,12 @@ while(1):
     except:
         pass
 
+    currVolume = pygame.mixer.music.get_volume()
+    if soundPlaying is True and currVolume < 1:
+        pygame.mixer.music.set_volume(currVolume + .06)
+    elif soundPlaying is False and currVolume > 0:
+        pygame.mixer.music.set_volume(currVolume - .06)
     time.sleep(1/10)
-
-    # if len(coordinates):
-    #     print(coordinates)
-    # websocket.send(json.dumps({
-    #     "event": "movement",
-    #     "data": ','.join(str(e) for e in coordinates)
-    # }))
-
-    # vertical_concat=np.concatenate((frame, thresh), axis=0)
-
-    # cv2.imshow('frame', vertical_concat)
-    # cv2.imshow('frame1',thresh)
 
     k = cv2.waitKey(30) & 0xff
     if k == 27:
