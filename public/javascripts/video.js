@@ -75,9 +75,9 @@ let removeFlash = () => {
 initSocket();
 
 let videoElem = document.getElementsByClassName('js-video')[0]
-async function playVideo() {
+function playVideo() {
     try {
-        await videoElem.play();
+        videoElem.play();
     } catch (err) {
         console.log(err, err.name);
     }

@@ -28,7 +28,9 @@ args = parser.parse_args()
 
 if args.pi:
     import pygame
-    pygame.mixer.pre_init(frequency=22500, size=-16, channels=1, buffer=4096)
+    import mutagen.mp3
+    mp3 = mutagen.mp3.MP3('/home/pi/gallery-show/public/audio/background.mp3')
+    pygame.mixer.init(frequency=mp3.info.sample_rate)
     pygame.init()
     pygame.mixer.init()
     pygame.mixer.music.load(
@@ -52,7 +54,7 @@ cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 # print(cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25))
 # cap.set(cv2.CAP_PROP_EXPOSURE, -7.0)
-fgbg = cv2.createBackgroundSubtractorMOG2(1000, 8, False)
+fgbg = cv2.createBackgroundSubtractorMOG2()
 
 
 def list_supported_capture_properties(cap: cv2.VideoCapture):
@@ -64,9 +66,6 @@ def list_supported_capture_properties(cap: cv2.VideoCapture):
             if cap.get(getattr(cv2, attr)) != False:
                 supported.append(attr)
     return supported
-
-
-print(list_supported_capture_properties(cap))
 
 
 detector = cv2.SimpleBlobDetector_create()
@@ -129,6 +128,9 @@ def init_socket():
 
 socket = init_socket()
 
+lastTime = time.time()
+testTime = 1
+
 while(1):
     ret, frame = cap.read()
 
@@ -137,7 +139,7 @@ while(1):
         fgmask = fgbg.apply(frame, learningRate=1)
         recalibrationNeeded = False
     else:
-        fgmask = fgbg.apply(frame, learningRate=0.002)
+        fgmask = fgbg.apply(frame, learningRate=0.001)
 
     im_gauss = cv2.GaussianBlur(fgmask, (5, 5), 0)
     ret, thresh = cv2.threshold(im_gauss, 127, 255, 0)
@@ -157,7 +159,7 @@ while(1):
     coordinates = []
     for con in contours:
         area = cv2.contourArea(con)
-        if 500 < area and area < 4000:
+        if 500 < area and area < 8000:
             x, y, w, h = cv2.boundingRect(con)
             shape_num = 0
             for sh in shapes:
@@ -228,14 +230,17 @@ while(1):
     if args.pi:
         currVolume = pygame.mixer.music.get_volume()
         if soundPlaying is True and currVolume < 1:
-            pygame.mixer.music.set_volume(currVolume + .06)
+            if currVolume == 0:
+                currVolume = .03
+            pygame.mixer.music.set_volume(currVolume + (1 * .03))
         elif soundPlaying is False and currVolume > 0:
-            pygame.mixer.music.set_volume(currVolume - .06)
-    time.sleep(1/10)
+            pygame.mixer.music.set_volume(currVolume - (currVolume * .01))
 
     k = cv2.waitKey(30) & 0xff
     if k == 27:
         break
+    now = time.time()
+    lastTime = now
 
 
 cap.release()
