@@ -99,10 +99,10 @@ def update_shapes(data):
 
 
 def update_config(data):
-    data_num = 0
-    for d in data:
-        config[data_num] = d
-        data_num += 1
+    print(data)
+    for d in data['config']:
+        print(d)
+        config[d] = data['config'][d]
 
 
 def on_message(ws, message):
@@ -195,7 +195,7 @@ while(1):
                     p2 = Polygon([(x, y), (x+w, y), (x+w, y+h), (x, y+h)])
 
                     if p1.intersects(p2):
-                        if debounce[shape_num] < config.fadeInDelay * 16:
+                        if debounce[shape_num] < config['fadeInDelay'] * 16:
                             debounce[shape_num] = debounce[shape_num] + 2
                         coordinates.append(shape_num)
                         if args.show_outlines:
@@ -228,7 +228,7 @@ while(1):
         if debounce[i] > 0:
             debounce[i] = debounce[i] - 1
 
-        if debounce[i] >= config.fadeInDelay * 16 and debounce_triggered[i] is False:
+        if debounce[i] >= config['fadeInDelay'] * 16 and debounce_triggered[i] is False:
             new_coordinates.append(i)
             debounce_triggered[i] = True
         elif debounce[i] > 0 and debounce_triggered[i] is True:
