@@ -13,6 +13,7 @@ canvas.width = width;
 canvas.height = height;
 activeAreas = [false, false, false, false];
 noImage = false;
+let config = {};
 
 var socket = new WebSocket(`ws://${window.location.hostname}:8080`, "protocolOne");
 socket.onmessage = function (e) {
@@ -33,6 +34,9 @@ socket.onmessage = function (e) {
             initButtons(data.data);
         }
         areas = data.data;
+    } else if (data.event == 'config') {
+        config = data.data;
+        buildConfigFields();
     }
 }
 
@@ -121,6 +125,38 @@ var sliders = document.getElementsByClassName('js-mdc-slider');
 for (let i = 0; i < sliders.length; i++) {
     slider = sliders[i];
     new mdc.slider.MDCSlider(slider);
+}
+
+var textFields = document.getElementsByClassName('mdc-text-field');
+for (let i = 0; i < textFields.length; i++) {
+    textField = textFields[i];
+    new mdc.textField.MDCTextField(textField);
+}
+
+function buildConfigFields() {
+    var configFields = document.getElementsByClassName('js-config-field');
+    for (let i = 0; i < configFields.length; i++) {
+        configField = configFields[i];
+        console.log(config);
+        configField.value = config[configField.dataset['fieldName']];
+        configField.focus();
+        configField.addEventListener('keyup', (e) => {
+            if (e.keyCode === 13) {
+                let num = parseFloat(e.target.value, 10);
+                if (!isNaN(num)) {
+                    config[e.target.dataset['fieldName']] = num;
+                    console.log(config);
+                    socket.send(JSON.stringify({
+                        "event": "updateConfig",
+                        "data": {
+                            config
+                        }
+                    }));
+                }
+                e.target.blur()
+            }
+        });
+    }
 }
 
 var updateFlags = document.getElementsByClassName('js-update-flags');
@@ -259,7 +295,7 @@ function handleFiles(file, id) {
     xhr.open("POST", `http://${window.location.host}/uploadVideo`, true);
     xhr.onloadend = function () {
         console.log('complete!');
-        window.location = window.location;
+        // window.location = window.location;
     }
 
     xhr.send(formData);

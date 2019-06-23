@@ -71,6 +71,22 @@ def list_supported_capture_properties(cap: cv2.VideoCapture):
 detector = cv2.SimpleBlobDetector_create()
 
 shapes = json.loads(open('shape_config.json', 'r').read())
+config = ''
+try:
+    config_file = open('config.json', 'r')
+    config = json.loads(config_file.read())
+    config_file.close()
+except:
+    config_example = open('config.json.example', 'r')
+    info = config_example.read()
+    config_example.close()
+
+    config_file = open('config.json', 'w+')
+    config_file.write(info)
+    config_file.close()
+    config = json.loads(info)
+
+print(config)
 
 socket = None
 
@@ -82,11 +98,21 @@ def update_shapes(data):
         data_num += 1
 
 
+def update_config(data):
+    data_num = 0
+    for d in data:
+        config[data_num] = d
+        data_num += 1
+
+
 def on_message(ws, message):
     data = json.loads(message)
     print(data['event'])
     if data['event'] == 'shapeData' or data['event'] == 'updateAreas':
         update_shapes(data['data'])
+    if data['event'] == 'updateConfig':
+        update_config(data['data'])
+        print(config)
     if data['event'] == 'updateFlags':
         for flag in data['data']:
             if flag == 'recalibrate':
@@ -139,7 +165,8 @@ while(1):
         fgmask = fgbg.apply(frame, learningRate=1)
         recalibrationNeeded = False
     else:
-        fgmask = fgbg.apply(frame, learningRate=0.001)
+        fgmask = fgbg.apply(
+            frame, learningRate=(.007 / config['learningSpeed']))
 
     im_gauss = cv2.GaussianBlur(fgmask, (5, 5), 0)
     ret, thresh = cv2.threshold(im_gauss, 127, 255, 0)
@@ -168,7 +195,7 @@ while(1):
                     p2 = Polygon([(x, y), (x+w, y), (x+w, y+h), (x, y+h)])
 
                     if p1.intersects(p2):
-                        if debounce[shape_num] < args.debounce_sensitivity:
+                        if debounce[shape_num] < config.fadeInDelay * 16:
                             debounce[shape_num] = debounce[shape_num] + 2
                         coordinates.append(shape_num)
                         if args.show_outlines:
@@ -201,7 +228,7 @@ while(1):
         if debounce[i] > 0:
             debounce[i] = debounce[i] - 1
 
-        if debounce[i] >= args.debounce_sensitivity and debounce_triggered[i] is False:
+        if debounce[i] >= config.fadeInDelay * 16 and debounce_triggered[i] is False:
             new_coordinates.append(i)
             debounce_triggered[i] = True
         elif debounce[i] > 0 and debounce_triggered[i] is True:

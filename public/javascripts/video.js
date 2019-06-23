@@ -5,6 +5,7 @@ let currentTween;
 let flash = null;
 
 let socket;
+let config;
 
 initSocket = () => {
     socket = new WebSocket(`ws://${window.location.hostname}:8080`, "protocolOne");
@@ -29,7 +30,7 @@ initSocket = () => {
         if (data.event == 'videoPause') {
             if (data.data.videoId === id) {
                 // videoElem.pause();
-                currentTween = TweenLite.to(currentVisual, 1, {
+                currentTween = TweenLite.to(currentVisual, config.fadeOutSpeed, {
                     perc: 0, onUpdate: () => {
                         videoElem.style.opacity = currentVisual.perc;
                         videoElem.volume = currentVisual.perc;
@@ -41,7 +42,7 @@ initSocket = () => {
         } else if (data.event == 'videoPlay') {
             if (data.data.videoId === id) {
                 playVideo();
-                currentTween = TweenLite.to(currentVisual, 1, {
+                currentTween = TweenLite.to(currentVisual, config.fadeInSpeed, {
                     perc: 1, onUpdate: () => {
                         videoElem.style.opacity = currentVisual.perc;
                         videoElem.volume = currentVisual.perc;
@@ -62,6 +63,9 @@ initSocket = () => {
                 console.log('b');
                 window.location = window.location;
             }
+        } else if (data.event == 'config' || data.event == 'updateConfig') {
+            console.log(data.data);
+            config = data.data;
         }
     }
 }

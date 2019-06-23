@@ -27,36 +27,16 @@
                             aria-hidden="true">format_shapes</span>Toggle
                         Outlines</li>
                 </ul>
-                <h3 class="mdc-typography--subtitle1">Min Size</h3>
-                <div class="mdc-slider mdc-slider--discrete js-mdc-slider" tabindex="0" role="slider" aria-valuemin="0"
-                    aria-valuemax="100" aria-valuenow="0" aria-label="Select Value">
-                    <div class="mdc-slider__track-container">
-                        <div class="mdc-slider__track"></div>
-                    </div>
-                    <div class="mdc-slider__thumb-container">
-                        <div class="mdc-slider__pin">
-                            <span class="mdc-slider__pin-value-marker"></span>
+                <div class="text-field-container">
+                    <div class="mdc-text-field text-field mdc-text-field--outlined">
+                        <input type="text" id="text-field-outlined" class="mdc-text-field__input js-config-field"
+                            data-field-name="learningSpeed">
+                        <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                            <div class="mdc-notched-outline__leading"></div>
+                            <div class="mdc-notched-outline__notch" style=""><label class="mdc-floating-label"
+                                    for="text-field-outlined" style="">Learning Time (in seconds)</label></div>
+                            <div class="mdc-notched-outline__trailing"></div>
                         </div>
-                        <svg class="mdc-slider__thumb" width="21" height="21">
-                            <circle cx="10.5" cy="10.5" r="7.875"></circle>
-                        </svg>
-                        <div class="mdc-slider__focus-ring"></div>
-                    </div>
-                </div>
-                <h3 class="mdc-typography--subtitle1">Max Size</h3>
-                <div class="mdc-slider mdc-slider--discrete js-mdc-slider" tabindex="0" role="slider" aria-valuemin="0"
-                    aria-valuemax="100" aria-valuenow="0" aria-label="Select Value">
-                    <div class="mdc-slider__track-container">
-                        <div class="mdc-slider__track"></div>
-                    </div>
-                    <div class="mdc-slider__thumb-container">
-                        <div class="mdc-slider__pin">
-                            <span class="mdc-slider__pin-value-marker"></span>
-                        </div>
-                        <svg class="mdc-slider__thumb" width="21" height="21">
-                            <circle cx="10.5" cy="10.5" r="7.875"></circle>
-                        </svg>
-                        <div class="mdc-slider__focus-ring"></div>
                     </div>
                 </div>
             </div>
@@ -135,6 +115,49 @@
 
 <h3 class="mdc-typography--headline3">Videos</h3>
 
+<div class="text-field-container">
+    <div class="mdc-text-field text-field mdc-text-field--outlined"><input type="text" id="text-field-outlined"
+            class="mdc-text-field__input js-config-field" data-field-name="fadeInDelay">
+        <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+            <div class="mdc-notched-outline__leading"></div>
+            <div class="mdc-notched-outline__notch" style=""><label class="mdc-floating-label" for="text-field-outlined"
+                    style="">Fade-in Delay (in seconds)</label></div>
+            <div class="mdc-notched-outline__trailing"></div>
+        </div>
+    </div>
+
+    <div class="mdc-text-field text-field mdc-text-field--outlined"><input type="text" id="text-field-outlined"
+            class="mdc-text-field__input js-config-field" data-field-name="fadeInSpeed">
+        <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+            <div class="mdc-notched-outline__leading"></div>
+            <div class="mdc-notched-outline__notch" style=""><label class="mdc-floating-label" for="text-field-outlined"
+                    style="">Fade-in Time (in seconds)</label></div>
+            <div class="mdc-notched-outline__trailing"></div>
+        </div>
+    </div>
+
+    <div class="mdc-text-field text-field mdc-text-field--outlined"><input type="text" id="text-field-outlined"
+            class="mdc-text-field__input js-config-field" data-field-name="fadeOutDelay">
+        <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+            <div class="mdc-notched-outline__leading"></div>
+            <div class="mdc-notched-outline__notch" style=""><label class="mdc-floating-label" for="text-field-outlined"
+                    style="">Fade-out Delay (in seconds)</label></div>
+            <div class="mdc-notched-outline__trailing"></div>
+        </div>
+    </div>
+
+    <div class="mdc-text-field text-field mdc-text-field--outlined"><input type="text" id="text-field-outlined"
+            class="mdc-text-field__input js-config-field" data-field-name="fadeOutSpeed">
+        <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+            <div class="mdc-notched-outline__leading"></div>
+            <div class="mdc-notched-outline__notch" style=""><label class="mdc-floating-label" for="text-field-outlined"
+                    style="">Fade-out Time (in seconds)</label></div>
+            <div class="mdc-notched-outline__trailing"></div>
+        </div>
+    </div>
+</div>
+
+<br>
 <div class="video-container">
     <div class="mdc-card demo-card">
         <div class="mdc-card__primary-action demo-card__primary-action" tabindex="1">

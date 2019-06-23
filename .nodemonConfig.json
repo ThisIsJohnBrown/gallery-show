@@ -2,6 +2,7 @@
     "verbose": false,
     "ignore": [
         "shape_config.json",
+        "config.json",
         "public"
     ],
     "execMap": {}

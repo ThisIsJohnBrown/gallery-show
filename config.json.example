@@ -1,0 +1,7 @@
+{
+    "fadeInDelay": 500,
+    "fadeInSpeed": 500,
+    "fadeOutDelay": 500,
+    "fadeOutSpeed": 500,
+    "learningSpeed": 50
+}

@@ -13,6 +13,7 @@ var http = require('http');
 
 // let shapeData = JSON.parse(fs.readFileSync('/home/pi/gallery-show/shape_config.json'));
 let shapeData = JSON.parse(fs.readFileSync('shape_config.json'));
+let config = JSON.parse(fs.readFileSync('config.json'));
 let currentMovement = [];
 
 // var audioOptions = {
@@ -135,11 +136,14 @@ updateIps = () => {
 wss.on('connection', function connection(ws) {
   console.log('user found!')
 
-
-
   ws.send(JSON.stringify({
     event: "shapeData",
     data: shapeData
+  }))
+
+  ws.send(JSON.stringify({
+    event: "config",
+    data: config
   }))
 
   ws.on('message', function incoming(rawData) {
@@ -148,6 +152,9 @@ wss.on('connection', function connection(ws) {
     if (data.event === 'updateAreas') {
       shapeData = data.data;
       fs.writeFileSync('shape_config.json', JSON.stringify(shapeData))
+    } if (data.event === 'updateConfig') {
+      config = data.data.config;
+      fs.writeFileSync('config.json', JSON.stringify(config))
     } else if (data.event === 'flashScreen') {
       console.log(data.data.id);
     } else if (data.event === 'videoConnectInfo') {
@@ -156,12 +163,12 @@ wss.on('connection', function connection(ws) {
         this[key] = data.data[key];
       })
 
-      const regex = /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/gm;
-      var ip = this._socket.remoteAddress.match(regex);
-      if (ip.length) {
-        videoIps[ip[0]] = this;
-      }
-      updateIps();
+      // const regex = /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/gm;
+      // var ip = this._socket.remoteAddress.match(regex);
+      // if (ip.length) {
+      //   videoIps[ip[0]] = this;
+      // }
+      // updateIps();
     } else if (data.event === 'camUpdate') {
       for (let i = 0; i < shapeData.length; i++) {
         const inNew = data.data.movement.indexOf(i) !== -1;
@@ -348,7 +355,7 @@ function onListening() {
   debug('Listening on ' + bind);
 }
 
-var port = process.env.PORT || '3000';
+var port = '3000';
 app.set('port', port);
 
 var server = http.createServer(app);
