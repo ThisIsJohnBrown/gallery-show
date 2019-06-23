@@ -293,7 +293,7 @@ app.post('/uploadAudio', audioUpload.single('audio'), function (req, res, next) 
 
 app.use('/', indexRouter);
 app.use('/test', (req, res) => {
-  res.redirect('test3')
+  res.redirect('test4')
 });
 app.use('/users', usersRouter);
 
