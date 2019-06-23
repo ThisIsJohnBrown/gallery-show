@@ -292,6 +292,9 @@ app.post('/uploadAudio', audioUpload.single('audio'), function (req, res, next) 
 })
 
 app.use('/', indexRouter);
+app.use('/test', (req, res) => {
+  res.redirect('test3')
+});
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
