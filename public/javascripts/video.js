@@ -30,7 +30,9 @@ initSocket = () => {
         if (data.event == 'videoPause') {
             if (data.data.videoId === id) {
                 // videoElem.pause();
+                console.log('fading out', config);
                 currentTween = TweenLite.to(currentVisual, config.fadeOutSpeed, {
+                    delay: config.fadeOutDelay,
                     perc: 0, onUpdate: () => {
                         videoElem.style.opacity = currentVisual.perc;
                         videoElem.volume = currentVisual.perc;
@@ -43,6 +45,7 @@ initSocket = () => {
             if (data.data.videoId === id) {
                 playVideo();
                 currentTween = TweenLite.to(currentVisual, config.fadeInSpeed, {
+                    delay: config.fadeInDelay,
                     perc: 1, onUpdate: () => {
                         videoElem.style.opacity = currentVisual.perc;
                         videoElem.volume = currentVisual.perc;

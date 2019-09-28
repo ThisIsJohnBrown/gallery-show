@@ -1,7 +1,9 @@
 {
-    "fadeInDelay": 500,
-    "fadeInSpeed": 500,
-    "fadeOutDelay": 500,
-    "fadeOutSpeed": 500,
-    "learningSpeed": 50
+    "fadeInDelay": 2,
+    "fadeInSpeed": 1,
+    "fadeOutDelay": 20,
+    "fadeOutSpeed": 10,
+    "learningSpeed": 120,
+    "minSize": 5,
+    "maxSize": 80
 }

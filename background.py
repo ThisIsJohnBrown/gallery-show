@@ -1,19 +1,19 @@
-import sys
-import base64
-import json
-import numpy as np
-import cv2
-import time
-import websocket
-from shapely.geometry import Polygon
+import threading
 from argparse import ArgumentParser
+from shapely.geometry import Polygon
+import websocket
+import time
+import cv2
+import numpy as np
+import json
+import base64
+import sys
 
 
 try:
     import thread
 except ImportError:
     import _thread as thread
-import threading
 
 parser = ArgumentParser()
 parser.add_argument("--pi", dest="pi")
@@ -35,8 +35,8 @@ if args.pi:
     pygame.mixer.init()
     pygame.mixer.music.load(
         '/home/pi/gallery-show/public/audio/background.mp3')
-    pygame.mixer.music.play(-1)
-    pygame.mixer.music.set_volume(0)
+    pygame.mixer.music.play(1)
+    # pygame.mixer.music.set_volume(0)
 
 recalibrationNeeded = False
 
@@ -45,14 +45,12 @@ height = 240
 
 debounce = [0, 0, 0, 0]
 debounce_triggered = [False, False, False, False]
-
 soundPlaying = False
 
-cap = cv2.VideoCapture(0)
-
+cap = cv2.VideoCapture(1)
+ret, frame = cap.read()
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-# print(cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25))
 # cap.set(cv2.CAP_PROP_EXPOSURE, -7.0)
 fgbg = cv2.createBackgroundSubtractorMOG2()
 
@@ -85,8 +83,6 @@ except:
     config_file.write(info)
     config_file.close()
     config = json.loads(info)
-
-print(config)
 
 socket = None
 
@@ -169,7 +165,7 @@ while(1):
             frame, learningRate=(.007 / config['learningSpeed']))
 
     im_gauss = cv2.GaussianBlur(fgmask, (5, 5), 0)
-    ret, thresh = cv2.threshold(im_gauss, 127, 255, 0)
+    ret, thresh = cv2.threshold(im_gauss, 200, 255, 0)
     contours, hierarchy = cv2.findContours(
         thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     thresh = cv2.cvtColor(thresh, cv2.COLOR_BGR2RGB)
@@ -186,7 +182,7 @@ while(1):
     coordinates = []
     for con in contours:
         area = cv2.contourArea(con)
-        if 500 < area and area < 8000:
+        if 100 < area:
             x, y, w, h = cv2.boundingRect(con)
             shape_num = 0
             for sh in shapes:
@@ -195,19 +191,22 @@ while(1):
                     p2 = Polygon([(x, y), (x+w, y), (x+w, y+h), (x, y+h)])
 
                     if p1.intersects(p2):
-                        if debounce[shape_num] < config['fadeInDelay'] * 16:
-                            debounce[shape_num] = debounce[shape_num] + 2
-                        coordinates.append(shape_num)
+                        if (config['minSize'] * 100) < area and area < (config['maxSize'] * 100):
+                            color = (0, 255, 0)
+                            if debounce[shape_num] < config['fadeInDelay'] * 16:
+                                debounce[shape_num] = debounce[shape_num] + 2
+                            coordinates.append(shape_num)
+                        else:
+                            color = (0, 0, 255)
                         if args.show_outlines:
                             cv2.rectangle(cam_return, (x, y), (x+w, y+h),
-                                          (int(sh["rgb"][2]), int(
-                                              sh["rgb"][1]), int(sh["rgb"][0])), 1)
+                                          color, 1)
                             # cv2.circle(cam_return, (int(x + w/2), int(y + h/2)),
                             #            4,
                             #            (int(sh["rgb"][2]), int(
                             #             sh["rgb"][1]), int(sh["rgb"][0])), -1)
                             cv2.putText(cam_return, str(int(area / 100)), (
-                                int(x + w/2), int(y + h/2)), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 2)
+                                int(x + w/2), int(y + h/2)), cv2.FONT_HERSHEY_SIMPLEX, .5, color, 2)
 
                     # sha = np.array(sh["points"], np.int32)
                     # sha = sha.reshape((-1, 1, 2))
@@ -255,13 +254,9 @@ while(1):
         pass
 
     if args.pi:
-        currVolume = pygame.mixer.music.get_volume()
-        if soundPlaying is True and currVolume < 1:
-            if currVolume == 0:
-                currVolume = .03
-            pygame.mixer.music.set_volume(currVolume + (1 * .03))
-        elif soundPlaying is False and currVolume > 0:
-            pygame.mixer.music.set_volume(currVolume - (currVolume * .01))
+        # currVolume = pygame.mixer.music.get_volume()
+        if soundPlaying is True and pygame.mixer.get_busy() is False:
+            pygame.mixer.music.play(1)
 
     k = cv2.waitKey(30) & 0xff
     if k == 27:
