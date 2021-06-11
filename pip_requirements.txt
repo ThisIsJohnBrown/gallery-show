@@ -35,4 +35,4 @@ traitlets==4.3.2
 wcwidth==0.1.7
 websocket==0.2.1
 websocket-client==0.55.0
-websockets==7.0
+websockets==9.1
