@@ -3,7 +3,7 @@ backcall==0.1.0
 cloudpickle==0.8.0
 cmake==3.13.3
 cycler==0.10.0
-dask==1.1.2
+dask==2021.10.0
 decorator==4.3.2
 dlib==19.16.0
 gevent==1.4.0
