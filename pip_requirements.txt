@@ -8,7 +8,7 @@ decorator==4.3.2
 dlib==19.16.0
 gevent==1.4.0
 greenlet==0.4.15
-ipython==7.3.0
+ipython==7.16.3
 ipython-genutils==0.2.0
 jedi==0.13.3
 kiwisolver==1.0.1
